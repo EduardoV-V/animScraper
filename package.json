@@ -1,0 +1,16 @@
+{
+  "name": "anitsu-cli",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Cliente Node para buscar e baixar arquivos do anitsu, com login OAuth (Discord) automático e renovação de sessão.",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "login": "node -e \"require('./session').performLogin({headless:true}).then(()=>console.log('Login inicial salvo.'))\"",
+    "login:manual": "node -e \"require('./session').performManualLogin().then(()=>console.log('Login manual salvo.'))\""
+  },
+  "dependencies": {
+    "axios": "^1.7.2",
+    "puppeteer-core": "^22.13.0"
+  }
+}
