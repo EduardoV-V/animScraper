@@ -11,7 +11,7 @@
 
 const path = require("path");
 const readline = require("readline");
-const { search, listFiles } = require("./api");
+const { listFiles } = require("./api");
 const { downloadAll } = require("./download");
 
 const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
@@ -22,27 +22,124 @@ function humanSize(bytes) {
   return (bytes / 1048576).toFixed(2) + " MB";
 }
 
-// Categorias de busca que a gente considera "conteúdo de vídeo" e mantém
-// na lista. Ajuste aqui se quiser incluir Mangás, Filmes etc de novo.
-const ALLOWED_CATEGORIES = ["Animes"];
+// --- Utilitários de busca (case-insensitive + fuzzy + filtro de diretório limpo) ---
 
-function classify(itemPath) {
-  if (itemPath.startsWith("Animes/")) return "ANIME";
-  if (itemPath.startsWith("Mangás/")) return "MANGÁ";
-  return "DESCONHECIDO";
+/** Remove acentos e normaliza para comparação (case-insensitive, accent-insensitive). */
+function normalize(str) {
+  return (str || "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .trim();
+}
+
+/** Distância de Levenshtein clássica (edições necessárias para transformar a em b). */
+function levenshtein(a, b) {
+  const m = a.length;
+  const n = b.length;
+  if (m === 0) return n;
+  if (n === 0) return m;
+
+  const dp = Array.from({ length: m + 1 }, () => new Array(n + 1).fill(0));
+  for (let i = 0; i <= m; i++) dp[i][0] = i;
+  for (let j = 0; j <= n; j++) dp[0][j] = j;
+
+  for (let i = 1; i <= m; i++) {
+    for (let j = 1; j <= n; j++) {
+      dp[i][j] =
+        a[i - 1] === b[j - 1]
+          ? dp[i - 1][j - 1]
+          : 1 + Math.min(dp[i - 1][j - 1], dp[i - 1][j], dp[i][j - 1]);
+    }
+  }
+  return dp[m][n];
+}
+
+/**
+ * Compara a query com o nome do resultado: case-insensitive, ignora acentos,
+ * aceita substring direta e também nomes "próximos" (erro de digitação) tipo
+ * "natuto" -> "naruto".
+ */
+function fuzzyMatch(query, name) {
+  const q = normalize(query);
+  const t = normalize(name);
+  if (!q) return true;
+  if (t.includes(q)) return true;
+
+  // Tolerância proporcional ao tamanho da query.
+  const maxDist = q.length <= 4 ? 1 : q.length <= 8 ? 2 : 3;
+
+  // Compara contra o nome inteiro e também contra cada "palavra" dele,
+  // pra pegar casos tipo "Naruto Shippuden" batendo com query "naruto".
+  const tokens = t.split(/[^a-z0-9]+/i).filter(Boolean);
+  const candidates = [t, ...tokens];
+
+  // Exige que a primeira letra bata, pra "natuto" -> "naruto" passar mas
+  // não confundir nomes parecidos e distintos (ex: "boruto" x "naruto").
+  return candidates.some((c) => c[0] === q[0] && levenshtein(q, c) <= maxDist);
+}
+
+/**
+ * Confere se o nome de uma pasta de "letra" (ex: "Letra N", "N") corresponde
+ * à primeira letra normalizada da busca.
+ */
+function letterFolderMatches(folderName, letter) {
+  if (!letter) return false;
+  const norm = normalize(folderName);
+  return (
+    norm === letter ||
+    norm === `letra ${letter}` ||
+    norm.endsWith(` ${letter}`) ||
+    norm.endsWith(`-${letter}`)
+  );
+}
+
+/**
+ * Busca os animes cujo nome bate (exato ou aproximado) com a query,
+ * navegando direto pela árvore de pastas em vez de depender do
+ * /api/search — que na prática ignora qualquer parâmetro além de "q",
+ * limita a 50 resultados e não garante que o item certo apareça nem
+ * esteja bem ranqueado (confirmado testando a API diretamente).
+ *
+ * Fluxo: lista "Animes/" -> acha a pasta da letra certa (pelo 1º
+ * caractere da busca) -> lista o conteúdo dela -> filtra localmente.
+ * Se não achar a pasta da letra esperada (estrutura pode variar),
+ * cai pra uma varredura de todas as pastas de letra.
+ */
+async function findAnimeMatches(query) {
+  const animesRoot = await listFiles("Animes");
+  const letterFolders = (animesRoot.files || []).filter((f) => f.is_directory !== false);
+
+  if (letterFolders.length === 0) {
+    console.log('[debug] "Animes/" não retornou nenhuma subpasta. Estrutura recebida:');
+    console.log(JSON.stringify(animesRoot, null, 2));
+    return [];
+  }
+
+  const letter = normalize(query)[0];
+  let candidateFolders = letterFolders.filter((f) => letterFolderMatches(f.name, letter));
+
+  if (candidateFolders.length === 0) {
+    // Não achamos a pasta esperada pra essa letra — varre todas como fallback.
+    candidateFolders = letterFolders;
+  }
+
+  const matches = [];
+  for (const folder of candidateFolders) {
+    const folderPath = `Animes/${folder.name}`;
+    const data = await listFiles(folderPath);
+    const items = (data.files || []).filter((f) => f.is_directory !== false);
+    for (const item of items) {
+      if (fuzzyMatch(query, item.name)) {
+        matches.push({ name: item.name, path: `${folderPath}/${item.name}` });
+      }
+    }
+  }
+  return matches;
 }
 
 async function pickSearchResult(query) {
-  const data = await search(query);
-  const allResults = data.results || [];
-
-  const results = allResults.filter((r) => {
-    const type = classify(r.path);
-    if (!ALLOWED_CATEGORIES.includes(r.path.split("/")[0])) return false;
-    // Se a API informar is_directory, garante que só pastas passem.
-    if (r.is_directory === false) return false;
-    return type !== "DESCONHECIDO";
-  });
+  const results = await findAnimeMatches(query);
 
   if (results.length === 0) {
     console.log("Nenhum resultado encontrado.");
@@ -51,7 +148,7 @@ async function pickSearchResult(query) {
 
   console.log("\nResultados encontrados:");
   results.forEach((r, i) => {
-    console.log(`[${i + 1}] [${classify(r.path)}] ${r.name}`);
+    console.log(`[${i + 1}] ${r.name}`);
   });
 
   const choice = await ask("\nEscolha uma opção: ");
