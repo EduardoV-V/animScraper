@@ -219,10 +219,10 @@ async function chooseDestination(padrao) {
 
   let baseDir, isAnime = false;
   if (dest === "1") {
-    baseDir = "/storage/emulated/0/Downloads/Animes";
+    baseDir = "/mnt/e/Animes";
     isAnime = true;
   } else if (dest === "2") {
-    baseDir = "/storage/emulated/0/Downloads/Filmes";
+    baseDir = "/mnt/e/Filmes";
   } else if (dest === "3") {
     baseDir = (await ask("Diretório base: ")).replace(/^~/, process.env.HOME || "");
   } else {
