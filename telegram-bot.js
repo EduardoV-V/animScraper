@@ -19,7 +19,7 @@ const {
   buildRenamedList,
 } = require("./core");
 const { translateTitle } = require("./anilist");
-const { downloadAll } = require("./download");
+const downloadQueue = require("./download");
 const sonarr = require("./sonarr");
 
 const BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
@@ -153,23 +153,26 @@ async function triggerDownload(ctx, session) {
   const files = session.selectedFiles.map((f, i) => ({
     remotePath: `${session.currentPath}/${f.name}`,
     outName: session.renamed[i],
+    size: f.size,
   }));
   const finalDir = session.finalDir;
   const chatId = ctx.chat.id;
-  const telegram = ctx.telegram;
 
-  await ctx.reply(`Baixando ${files.length} arquivo(s) para ${finalDir}...`);
+  const statusBefore = downloadQueue.getStatus();
+  const willQueue = Boolean(statusBefore.current); // já tem algo baixando agora?
 
-  // Libera a sessão (e o bot) imediatamente — não damos "await" no
-  // download aqui de propósito. O Telegraf processa uma mensagem por vez;
-  // se esperássemos o aria2 terminar dentro deste handler, o bot ficaria
-  // preso sem processar nenhum outro comando até o download acabar. O
-  // download roda "solto" em background e avisa quando terminar/falhar.
+  downloadQueue.enqueueDownload(files, finalDir, { label: session.padrao, chatId });
+
+  await ctx.reply(
+    willQueue
+      ? `📥 "${session.padrao}" (${files.length} arquivo(s)) adicionado à fila — tem outro download em andamento. Use /status pra acompanhar.`
+      : `⬇️ Baixando "${session.padrao}" (${files.length} arquivo(s)). Use /status pra acompanhar.`
+  );
+
+  // Libera a sessão (e o bot) imediatamente — o download roda em
+  // background via a fila; os avisos de conclusão/erro chegam pelos
+  // listeners de evento registrados mais abaixo (downloadQueue.events).
   resetSession(chatId);
-
-  downloadAll(files, finalDir)
-    .then(() => telegram.sendMessage(chatId, "✅ Downloads finalizados."))
-    .catch((err) => telegram.sendMessage(chatId, `❌ Erro no download: ${err.message}`));
 }
 
 // ============================================================
@@ -228,6 +231,7 @@ bot.start((ctx) =>
       "/monitorar <nome> — liga/desliga monitoramento\n" +
       "/deletar <nome> — remove uma série da biblioteca\n" +
       "/espaco — espaço livre em disco (segundo o Sonarr)\n\n" +
+      "/status — mostra o download atual e a fila\n" +
       "/cancelar ou /home — cancela qualquer coisa em andamento e volta ao início\n" +
       "/id — mostra seu Telegram user id"
   )
@@ -236,6 +240,28 @@ bot.start((ctx) =>
 bot.command(["cancelar", "home"], (ctx) => {
   resetSession(ctx.chat.id);
   ctx.reply("🏠 Tudo cancelado. Pode mandar /buscar, /addserie, etc.");
+});
+
+bot.command("status", (ctx) => {
+  const { current, queued } = downloadQueue.getStatus();
+
+  if (!current && queued.length === 0) {
+    return ctx.reply("Nenhum download em andamento ou na fila.");
+  }
+
+  const lines = [];
+  if (current) {
+    const pct = current.progressPercent;
+    lines.push(
+      `⬇️ Baixando agora: "${current.label}" (${current.fileCount} arquivo(s))` +
+        (pct !== null ? ` — ${pct}%` : "")
+    );
+  }
+  if (queued.length > 0) {
+    lines.push("\nNa fila:");
+    queued.forEach((j, i) => lines.push(`${i + 1}. "${j.label}" (${j.fileCount} arquivo(s))`));
+  }
+  ctx.reply(lines.join("\n"));
 });
 
 bot.command("buscar", (ctx) => {
@@ -658,6 +684,32 @@ bot.on("text", (ctx) => {
   if (ctx.message.text.startsWith("/")) {
     return ctx.reply("Comando não reconhecido. Envie /start pra ver a lista, ou /home pra cancelar o que estiver rolando.");
   }
+});
+
+// ============================================================
+// Eventos da fila de download — avisa o chat que pediu quando o job
+// começar/terminar/falhar (mesmo que o usuário já tenha saído do fluxo).
+// ============================================================
+
+downloadQueue.events.on("started", (job) => {
+  if (!job.chatId) return;
+  bot.telegram
+    .sendMessage(job.chatId, `▶️ Começando a baixar "${job.label}" (${job.files.length} arquivo(s))...`)
+    .catch(() => {});
+});
+
+downloadQueue.events.on("done", (job) => {
+  if (!job.chatId) return;
+  bot.telegram
+    .sendMessage(job.chatId, `✅ "${job.label}" — download concluído (${job.files.length} arquivo(s)).`)
+    .catch(() => {});
+});
+
+downloadQueue.events.on("error", (job, err) => {
+  if (!job.chatId) return;
+  bot.telegram
+    .sendMessage(job.chatId, `❌ Erro baixando "${job.label}": ${err.message}`)
+    .catch(() => {});
 });
 
 bot.catch((err, ctx) => {

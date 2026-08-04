@@ -9,7 +9,7 @@
 
 const path = require("path");
 const readline = require("readline");
-const { downloadAll } = require("./download");
+const { downloadAllAndWait } = require("./download");
 const {
   humanSize,
   findAnimeMatches,
@@ -151,10 +151,11 @@ async function main() {
   const files = selected.map((f, i) => ({
     remotePath: `${targetPath}/${f.name}`,
     outName: renamed[i],
+    size: f.size,
   }));
 
   console.log(`\nBaixando ${files.length} arquivo(s) para ${finalDir}...`);
-  await downloadAll(files, finalDir);
+  await downloadAllAndWait(files, finalDir, { label: padrao });
   console.log("Downloads finalizados.");
 
   rl.close();
