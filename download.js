@@ -56,7 +56,10 @@ function downloadWithAria2(files, finalDir, cookieHdr) {
         "--min-split-size=2M",
         "--split=16",
         "--max-concurrent-downloads=5",
-        "--file-allocation=prealloc",
+        // "prealloc" pode ser bem lento em armazenamento acessado via
+        // FUSE/SAF (ex: /storage/emulated/0 no Android/Termux) — "none"
+        // evita essa alocação prévia e costuma ser bem mais rápido aí.
+        "--file-allocation=none",
         "--continue=true",
         "--console-log-level=notice",
         "--summary-interval=30",

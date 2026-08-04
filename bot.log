@@ -1,0 +1,50 @@
+nohup: ignoring input
+
+> anitsu-cli@1.0.0 bot
+> node telegram-bot.js
+
+Sessão ausente ou expirada. Renovando...
+[debug] após abrir LOGIN_URL: https://anitsu.moe/ | título: "Anitsu"
+[debug] botão "Entrar com Discord" encontrado? true
+[debug] a sessão salva no perfil já está autenticada (redirecionou pra https://anitsu.moe/) — pulando fluxo de login.
+[debug] cookies capturados: sb-qzrxxwizigfdcpmwkztq-auth-token.1, sb-qzrxxwizigfdcpmwkztq-auth-token.0
+
+08/03 21:20:31 [[1;32mNOTICE[0m] Downloading 12 item(s)
+[DL:0B][#9ab381 0B/0B][#b9b965 0B/0B][#d70f73 0B/0B][#bb781d 0B/0B][#bfd613 0B/0B]
+[DL:1.0MiB][#9ab381 208KiB/512MiB(0%)][#b9b965 112KiB/520MiB(0%)][#d70f73 192KiB/601MiB(0%)][#bb781d 176KiB/577MiB(0%)][#bfd613 208KiB/542MiB(0%)]
+[DL:5.5MiB][#9ab381 2.4MiB/512MiB(0%)][#b9b965 1.1MiB/520MiB(0%)][#d70f73 2.1MiB/601MiB(0%)][#bb781d 1.8MiB/577MiB(0%)][#bfd613 2.8MiB/542MiB(0%)]
+[DL:7.3MiB][#9ab381 4.9MiB/512MiB(0%)][#b9b965 2.7MiB/520MiB(0%)][#d70f73 4.0MiB/601MiB(0%)][#bb781d 3.5MiB/577MiB(0%)][#bfd613 5.9MiB/542MiB(1%)]
+[DL:8.3MiB][#9ab381 7.7MiB/512MiB(1%)][#b9b965 4.1MiB/520MiB(0%)][#d70f73 5.7MiB/601MiB(0%)][#bb781d 5.3MiB/577MiB(0%)][#bfd613 9.9MiB/542MiB(1%)]
+[DL:10MiB][#9ab381 12MiB/512MiB(2%)][#b9b965 6.8MiB/520MiB(1%)][#d70f73 7.9MiB/601MiB(1%)][#bb781d 7.8MiB/577MiB(1%)][#bfd613 18MiB/542MiB(3%)]
+[DL:11MiB][#9ab381 17MiB/512MiB(3%)][#b9b965 8.0MiB/520MiB(1%)][#d70f73 9.7MiB/601MiB(1%)][#bb781d 9.5MiB/577MiB(1%)][#bfd613 26MiB/542MiB(4%)]
+[DL:10MiB][#9ab381 18MiB/512MiB(3%)][#b9b965 8.6MiB/520MiB(1%)][#d70f73 10MiB/601MiB(1%)][#bb781d 10MiB/577MiB(1%)][#bfd613 27MiB/542MiB(5%)]
+[DL:12MiB][#9ab381 25MiB/512MiB(4%)][#b9b965 10MiB/520MiB(2%)][#d70f73 12MiB/601MiB(2%)][#bb781d 12MiB/577MiB(2%)][#bfd613 40MiB/542MiB(7%)]
+[DL:11MiB][#9ab381 27MiB/512MiB(5%)][#b9b965 11MiB/520MiB(2%)][#d70f73 12MiB/601MiB(2%)][#bb781d 12MiB/577MiB(2%)][#bfd613 43MiB/542MiB(7%)]
+[DL:10MiB][#9ab381 28MiB/512MiB(5%)][#b9b965 11MiB/520MiB(2%)][#d70f73 12MiB/601MiB(2%)][#bb781d 12MiB/577MiB(2%)][#bfd613 44MiB/542MiB(8%)]
+
+08/03 21:20:43 [[1;32mNOTICE[0m] Emergency shutdown sequence commencing...
+
+08/03 21:20:43 [[1;32mNOTICE[0m] Download GID#9ab381d411ab746c not complete: /storage/emulated/0/Download/Animes/Bocchi the rock/Season 1/Bocchi the rock - S01E01.mkv
+
+08/03 21:20:43 [[1;32mNOTICE[0m] Download GID#b9b965277ff2b599 not complete: /storage/emulated/0/Download/Animes/Bocchi the rock/Season 1/Bocchi the rock - S01E02.mkv
+
+08/03 21:20:43 [[1;32mNOTICE[0m] Download GID#d70f735953b239ea not complete: /storage/emulated/0/Download/Animes/Bocchi the rock/Season 1/Bocchi the rock - S01E03.mkv
+
+08/03 21:20:43 [[1;32mNOTICE[0m] Download GID#bb781ddfe427b541 not complete: /storage/emulated/0/Download/Animes/Bocchi the rock/Season 1/Bocchi the rock - S01E04.mkv
+
+08/03 21:20:43 [[1;32mNOTICE[0m] Download GID#bfd61358fa95bec6 not complete: /storage/emulated/0/Download/Animes/Bocchi the rock/Season 1/Bocchi the rock - S01E05.mkv
+
+Download Results:
+gid   |stat|avg speed  |path/URI
+======+====+===========+=======================================================
+9ab381|INPR|   3.3MiB/s|/storage/emulated/0/Download/Animes/Bocchi the rock/Season 1/Bocchi the rock - S01E01.mkv
+b9b965|INPR|   1.2MiB/s|/storage/emulated/0/Download/Animes/Bocchi the rock/Season 1/Bocchi the rock - S01E02.mkv
+d70f73|INPR|   1.4MiB/s|/storage/emulated/0/Download/Animes/Bocchi the rock/Season 1/Bocchi the rock - S01E03.mkv
+bb781d|INPR|   1.3MiB/s|/storage/emulated/0/Download/Animes/Bocchi the rock/Season 1/Bocchi the rock - S01E04.mkv
+bfd613|INPR|   5.3MiB/s|/storage/emulated/0/Download/Animes/Bocchi the rock/Season 1/Bocchi the rock - S01E05.mkv
+
+Status Legend:
+(INPR):download in-progress.
+
+aria2 will resume download if the transfer is restarted.
+If there are any errors, then see the log file. See '-l' option in help/man page for details.

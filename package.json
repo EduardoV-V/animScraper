@@ -2,15 +2,18 @@
   "name": "anitsu-cli",
   "version": "1.0.0",
   "private": true,
-  "description": "Cliente Node para buscar e baixar arquivos do anitsu, com login OAuth (Discord) automático e renovação de sessão.",
+  "description": "Cliente Node + bot do Telegram para buscar e baixar arquivos do anitsu, com login OAuth (Discord) automático, renovação de sessão e integração com Sonarr.",
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
+    "bot": "node telegram-bot.js",
     "login": "node -e \"require('./session').performLogin({headless:true}).then(()=>console.log('Login inicial salvo.'))\"",
     "login:manual": "node -e \"require('./session').performManualLogin().then(()=>console.log('Login manual salvo.'))\""
   },
   "dependencies": {
     "axios": "^1.7.2",
-    "puppeteer-core": "^22.13.0"
+    "puppeteer-core": "^22.13.0",
+    "telegraf": "^4.16.3",
+    "dotenv": "^16.4.5"
   }
 }

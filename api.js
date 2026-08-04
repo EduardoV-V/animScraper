@@ -1,10 +1,14 @@
 // api.js — chamadas à API do anitsu, com renovação automática de sessão.
+//
+// Importante: getValidCookies()/getFreshCookies() (em session.js) já tomam
+// conta de deduplicar renovações concorrentes. Aqui a gente só usa essas
+// funções — nunca dispara login diretamente.
 
 const axios = require("axios");
 const {
   ANITSU_BASE,
   getValidCookies,
-  performLoginForced,
+  getFreshCookies,
   cookieHeader,
 } = require("./session");
 
@@ -20,7 +24,7 @@ async function request(endpoint, params = {}) {
 
   if (res.status === 401 || res.status === 403) {
     console.log("Cookie expirou no meio da requisição. Renovando e tentando de novo...");
-    cookies = await performLoginForced();
+    cookies = await getFreshCookies();
     res = await axios.get(`${ANITSU_BASE}${endpoint}`, {
       params,
       headers: { Cookie: cookieHeader(cookies) },

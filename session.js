@@ -89,6 +89,20 @@ const DISCORD_MFA_SELECTOR = 'input[placeholder*="code" i], input[name="code"]';
 const CAPTCHA_SELECTOR = 'iframe[src*="hcaptcha"], iframe[src*="captcha"]';
 
 function askStdin(question) {
+  // Sem terminal interativo (ex: rodando como serviço em background via
+  // termux-services/tmux) não tem ninguém pra digitar nada — falha rápido
+  // com uma mensagem clara em vez de travar o processo pra sempre.
+  if (!process.stdin.isTTY) {
+    return Promise.reject(
+      new Error(
+        "Seria necessário digitar algo no terminal agora (2FA ou confirmação de login), " +
+          "mas este processo está rodando sem terminal interativo (em background). " +
+          "Pare o serviço e rode `npm run login:manual` (ou `npm run login`) manualmente " +
+          "num terminal de verdade, depois suba o serviço de novo."
+      )
+    );
+  }
+
   const readline = require("readline");
   const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
   return new Promise((resolve) => rl.question(question, (answer) => {
@@ -97,9 +111,11 @@ function askStdin(question) {
   }));
 }
 
-// TODO: endpoint leve e autenticado para testar se a sessão ainda é válida.
-// Usar /api/search com uma query vazia costuma ser suficiente.
-const HEALTHCHECK_PATH = "/api/search";
+// Endpoint leve e confiável pra testar se a sessão ainda é válida. Evite
+// usar /api/search aqui — na prática esse endpoint se mostrou instável
+// (ignora parâmetros, limita resultados), o que gerava falsos negativos.
+const HEALTHCHECK_PATH = "/api/files";
+const HEALTHCHECK_PARAMS = { path: "Animes" };
 
 const DATA_DIR = __dirname;
 const COOKIE_PATH = path.join(DATA_DIR, "cookies.json");
@@ -126,7 +142,7 @@ async function isSessionValid(cookies) {
   if (!cookies || cookies.length === 0) return false;
   try {
     const res = await axios.get(`${ANITSU_BASE}${HEALTHCHECK_PATH}`, {
-      params: { q: "a" },
+      params: HEALTHCHECK_PARAMS,
       headers: { Cookie: cookieHeader(cookies) },
       validateStatus: () => true,
       timeout: 10000,
@@ -286,35 +302,72 @@ async function performManualLogin() {
   return performLogin({ headless: false, manual: true });
 }
 
-/** Força renovação headless, ignorando o cookie salvo em disco. */
-async function performLoginForced() {
-  return performLogin({ headless: true });
-}
+// Cache curto de validade + lock de renovação. Isso evita que N chamadas
+// paralelas (ex: findAnimeMatches varrendo ~26 pastas de letra ao mesmo
+// tempo) cada uma decida "a sessão expirou" e dispare seu próprio
+// Puppeteer — todas esperam a MESMA renovação em andamento.
+const VALIDITY_TTL_MS = 30000;
+let cachedCookies = null;
+let cachedAt = 0;
+let renewalPromise = null;
 
 /**
  * Retorna cookies válidos, renovando automaticamente se necessário.
  * - Se nunca logou (sem PROFILE_DIR), pede login manual (headless: false).
  * - Se já logou antes, tenta renovar sozinho em headless.
+ * - Chamadas concorrentes reaproveitam a mesma renovação em andamento.
  */
 async function getValidCookies() {
-  const cookies = loadCookies();
-
-  if (cookies && (await isSessionValid(cookies))) {
-    return cookies;
+  const now = Date.now();
+  if (cachedCookies && now - cachedAt < VALIDITY_TTL_MS) {
+    return cachedCookies;
   }
 
-  console.log("Sessão ausente ou expirada. Renovando...");
-  const firstRun = !fs.existsSync(PROFILE_DIR);
+  if (renewalPromise) {
+    return renewalPromise;
+  }
 
-  const fresh = await performLogin({ headless: !firstRun });
-  return fresh;
+  renewalPromise = (async () => {
+    try {
+      let cookies = loadCookies();
+      if (!cookies || !(await isSessionValid(cookies))) {
+        console.log("Sessão ausente ou expirada. Renovando...");
+        const firstRun = !fs.existsSync(PROFILE_DIR);
+        cookies = await performLogin({ headless: !firstRun });
+      }
+      cachedCookies = cookies;
+      cachedAt = Date.now();
+      return cookies;
+    } finally {
+      renewalPromise = null;
+    }
+  })();
+
+  return renewalPromise;
+}
+
+/** Invalida o cache em memória — usado quando uma requisição real (não o
+ * healthcheck) descobre que o cookie caiu no meio do caminho. */
+function invalidateCache() {
+  cachedCookies = null;
+  cachedAt = 0;
+}
+
+/**
+ * Força renovação, também respeitando o lock (se já tiver uma renovação
+ * rolando por causa de outra chamada concorrente, espera ela em vez de
+ * abrir um segundo Puppeteer).
+ */
+async function getFreshCookies() {
+  invalidateCache();
+  return getValidCookies();
 }
 
 module.exports = {
   ANITSU_BASE,
   getValidCookies,
+  getFreshCookies,
   performLogin,
-  performLoginForced,
   performManualLogin,
   cookieHeader,
   loadCookies,
