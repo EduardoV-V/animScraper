@@ -20,6 +20,7 @@ const {
 } = require("./core");
 const { translateTitle } = require("./anilist");
 const downloadQueue = require("./download");
+const { startExternalServer, createDownloadLink, buildUrl } = require("./external-server");
 const sonarr = require("./sonarr");
 
 const BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
@@ -438,7 +439,48 @@ bot.action("vconfirm", async (ctx) => {
   const selectedFiles = session.dirView.videos.filter((_, i) => session.selected.has(i));
   if (selectedFiles.length === 0) return ctx.reply("Nenhum vídeo selecionado.");
   session.selectedFiles = selectedFiles;
+  session.rememberedPath = session.currentPath; // guarda pro link externo
+
+  await ctx.reply(
+    "Como você quer baixar?",
+    Markup.inlineKeyboard([
+      [Markup.button.callback("💾 Baixar no servidor (Sonarr/pasta)", "dlmode:server")],
+      [Markup.button.callback("🌐 Gerar link externo (compartilhar)", "dlmode:external")],
+    ])
+  );
+});
+
+bot.action("dlmode:server", async (ctx) => {
+  await ctx.answerCbQuery();
+  const session = getSession(ctx.chat.id);
   await startDestinationFlow(ctx, session);
+});
+
+bot.action("dlmode:external", async (ctx) => {
+  await ctx.answerCbQuery();
+  const session = getSession(ctx.chat.id);
+
+  let base;
+  try {
+    base = process.env.EXTERNAL_BASE_URL;
+    if (!base) throw new Error("EXTERNAL_BASE_URL não configurado no .env.");
+  } catch (err) {
+    return ctx.reply(`❌ ${err.message}`);
+  }
+
+  const links = session.selectedFiles.map((f) => {
+    const remotePath = `${session.rememberedPath}/${f.name}`;
+    const token = createDownloadLink(remotePath, f.name);
+    return { name: f.name, url: buildUrl(token) };
+  });
+
+  const buttons = links.map((l) => [Markup.button.url(`⬇️ ${l.name}`, l.url)]);
+  await ctx.reply(
+    `Link(s) gerado(s) — válidos por 24h, até 3 usos cada:\n\n` +
+      `⚠️ Funcionam só pra quem tem acesso à sua rede Tailscale. Não repasse pra fora dela.`,
+    Markup.inlineKeyboard(buttons)
+  );
+  resetSession(ctx.chat.id);
 });
 
 bot.action("noop", (ctx) => ctx.answerCbQuery());
@@ -716,6 +758,9 @@ bot.catch((err, ctx) => {
   console.error(`[bot] erro não tratado:`, err);
   ctx.reply(`Ocorreu um erro inesperado: ${err.message}`).catch(() => {});
 });
+
+const EXTERNAL_PORT = Number(process.env.EXTERNAL_PORT) || 8787;
+startExternalServer(EXTERNAL_PORT);
 
 bot.launch().then(() => console.log("Bot do Telegram rodando."));
 
