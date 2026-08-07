@@ -127,16 +127,17 @@ function runAria2Job(job, cookieHdr) {
         "--retry-wait=3",
         "--timeout=60",
         "--connect-timeout=30",
-        // Um job por vez (a fila cuida disso), então não precisa ser
-        // agressivo aqui — menos conexões simultâneas = menos chance de
-        // sobrecarregar rede/memória do celular.
-        "--max-connection-per-server=4",
-        "--min-split-size=4M",
-        "--split=4",
-        "--max-concurrent-downloads=2",
-        // "prealloc" pode ser bem lento em armazenamento acessado via
-        // FUSE/SAF (ex: /storage/emulated/0 no Android/Termux).
-        "--file-allocation=none",
+        // Como só roda 1 job por vez (a fila garante isso), dá pra ser
+        // mais agressivo com paralelismo sem o risco de somar conexões
+        // de vários downloads simultâneos.
+        "--max-connection-per-server=16",
+        "--min-split-size=2M",
+        "--split=16",
+        "--max-concurrent-downloads=5",
+        // Pré-aloca o espaço em disco pro tamanho final do arquivo antes
+        // de começar a escrever — evita fragmentação e realocações
+        // durante o download.
+        "--file-allocation=prealloc",
         "--continue=true",
         "--console-log-level=notice",
         "--summary-interval=10",

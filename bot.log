@@ -3,8 +3,3 @@ nohup: ignoring input
 > anitsu-cli@1.0.0 bot
 > node telegram-bot.js
 
-Sessão ausente ou expirada. Renovando...
-[debug] após abrir LOGIN_URL: https://anitsu.moe/ | título: "Anitsu"
-[debug] botão "Entrar com Discord" encontrado? true
-[debug] a sessão salva no perfil já está autenticada (redirecionou pra https://anitsu.moe/) — pulando fluxo de login.
-[debug] cookies capturados: sb-qzrxxwizigfdcpmwkztq-auth-token.1, sb-qzrxxwizigfdcpmwkztq-auth-token.0

@@ -30,12 +30,17 @@ async function mapWithConcurrency(items, limit, worker) {
 
 // --- Busca (case-insensitive + fuzzy) ---
 
-/** Remove acentos e normaliza para comparação (case-insensitive, accent-insensitive). */
+/** Remove acentos, pontuação e espaços duplicados, deixando só
+ * letras/números/espaço em minúsculo — pra comparar "Really, Really,"
+ * (como a AniList escreve) com "really really" (como se digita ou como o
+ * anitsu guarda nas pastas, sem pontuação) como a mesma coisa. */
 function normalize(str) {
   return (str || "")
     .normalize("NFD")
     .replace(/[\u0300-\u036f]/g, "")
     .toLowerCase()
+    .replace(/[^a-z0-9\s]+/g, " ")
+    .replace(/\s+/g, " ")
     .trim();
 }
 

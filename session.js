@@ -140,21 +140,43 @@ function cookieHeader(cookies) {
 
 async function isSessionValid(cookies) {
   if (!cookies || cookies.length === 0) return false;
-  try {
-    const res = await axios.get(`${ANITSU_BASE}${HEALTHCHECK_PATH}`, {
-      params: HEALTHCHECK_PARAMS,
-      headers: { Cookie: cookieHeader(cookies) },
-      validateStatus: () => true,
-      timeout: 10000,
-      maxRedirects: 0,
-    });
-    // Só consideramos inválida se o servidor claramente recusar a
-    // autenticação. Redirect (3xx, geralmente para tela de login) também
-    // conta como sessão inválida.
-    return res.status < 300 && res.status !== 401 && res.status !== 403;
-  } catch {
-    return false;
+
+  // Até 3 tentativas com espera curta — se a rede ainda não estabilizou
+  // (comum logo depois do boot do Android), não queremos concluir "cookie
+  // inválido" por causa disso e disparar um Chromium à toa.
+  for (let attempt = 1; attempt <= 3; attempt++) {
+    try {
+      const res = await axios.get(`${ANITSU_BASE}${HEALTHCHECK_PATH}`, {
+        params: HEALTHCHECK_PARAMS,
+        headers: { Cookie: cookieHeader(cookies) },
+        validateStatus: () => true,
+        timeout: 10000,
+        maxRedirects: 0,
+      });
+      // Chegou resposta de verdade do servidor — aí sim confiamos nela.
+      // Só consideramos inválida se o servidor claramente recusar a
+      // autenticação. Redirect (3xx, geralmente para tela de login)
+      // também conta como sessão inválida.
+      return res.status < 300 && res.status !== 401 && res.status !== 403;
+    } catch (err) {
+      const isNetworkFailure = !err.response; // sem resposta = problema de rede/DNS/timeout, não de auth
+      if (isNetworkFailure && attempt < 3) {
+        await new Promise((r) => setTimeout(r, 3000));
+        continue;
+      }
+      if (isNetworkFailure) {
+        // Rede indisponível mesmo após retries — não temos como saber se
+        // o cookie está bom ou não. Assumir "válido" evita lançar um
+        // Chromium (caro em memória) só porque a rede caiu momentaneamente;
+        // se o cookie realmente tiver expirado, a próxima requisição real
+        // vai detectar isso via 401/403 e renovar normalmente.
+        console.log("Healthcheck falhou por rede (não por autenticação) — assumindo sessão válida por ora.");
+        return true;
+      }
+      return false;
+    }
   }
+  return false;
 }
 
 /**
@@ -183,7 +205,27 @@ async function performLogin({ headless = true, manual = false } = {}) {
       "--disable-setuid-sandbox",
       "--disable-gpu",
       "--disable-dev-shm-usage",
-      "--single-process",
+      // Desliga subsistemas que a gente não usa — cada um economiza
+      // memória/CPU, o que importa bastante num celular com recursos
+      // limitados (suspeita principal de o Android matar o Termux
+      // inteiro por pressão de memória durante o lançamento do Chromium).
+      "--disable-extensions",
+      "--disable-component-extensions-with-background-pages",
+      "--disable-background-networking",
+      "--disable-background-timer-throttling",
+      "--disable-backgrounding-occluded-windows",
+      "--disable-breakpad",
+      "--disable-client-side-phishing-detection",
+      "--disable-default-apps",
+      "--disable-features=Translate,BackForwardCache,AcceptCHFrame",
+      "--disable-sync",
+      "--metrics-recording-only",
+      "--mute-audio",
+      "--no-first-run",
+      "--renderer-process-limit=1",
+      // Limita o heap do V8 — evita que uma página pesada infle o
+      // consumo de memória do processo sem necessidade nesse uso.
+      "--js-flags=--max-old-space-size=256",
     ],
   });
 
