@@ -10,6 +10,7 @@
 const path = require("path");
 const readline = require("readline");
 const { downloadAllAndWait } = require("./download");
+const { pickDirWithSpace, assertHasSpace, totalSize } = require("./disk-space");
 const {
   humanSize,
   findAnimeMatches,
@@ -89,18 +90,31 @@ async function browseFiles(rootPath) {
   }
 }
 
-async function chooseDestination(padrao) {
+// Mesma prioridade usada no bot: cartão SD primeiro (deve encher antes
+// do armazenamento interno).
+const SD_ANIME_BASE_DIR = process.env.SD_ANIME_BASE_DIR || "/storage/B3EE-1A06/Download/Animes";
+const SD_FILME_BASE_DIR = process.env.SD_FILME_BASE_DIR || "/storage/B3EE-1A06/Download/Filmes";
+const ANIME_BASE_DIR = process.env.ANIME_BASE_DIR || "/storage/emulated/0/Downloads/Animes";
+const FILME_BASE_DIR = process.env.FILME_BASE_DIR || "/storage/emulated/0/Downloads/Filmes";
+
+const ANIME_DIRS = [SD_ANIME_BASE_DIR, ANIME_BASE_DIR];
+const FILME_DIRS = [SD_FILME_BASE_DIR, FILME_BASE_DIR];
+
+async function chooseDestination(padrao, selectedFiles) {
   console.log("\n[1] Animes\n[2] Filmes\n[3] Digitar caminho manual");
   const dest = await ask("Destino: ");
 
+  const requiredBytes = totalSize(selectedFiles);
+
   let baseDir, isAnime = false;
   if (dest === "1") {
-    baseDir = "/storage/emulated/0/Downloads/Animes";
+    baseDir = pickDirWithSpace(ANIME_DIRS, requiredBytes, padrao);
     isAnime = true;
   } else if (dest === "2") {
-    baseDir = "/storage/emulated/0/Downloads/Filmes";
+    baseDir = pickDirWithSpace(FILME_DIRS, requiredBytes, padrao);
   } else if (dest === "3") {
     baseDir = (await ask("Diretório base: ")).replace(/^~/, process.env.HOME || "");
+    assertHasSpace(baseDir, requiredBytes, padrao);
   } else {
     throw new Error("Opção inválida.");
   }
@@ -145,7 +159,7 @@ async function main() {
   }
 
   const padrao = await ask("\nNome padrão: ");
-  const { finalDir, isAnime, season } = await chooseDestination(padrao);
+  const { finalDir, isAnime, season } = await chooseDestination(padrao, selected);
   const renamed = buildRenamedList(selected, padrao, isAnime, season);
 
   const files = selected.map((f, i) => ({

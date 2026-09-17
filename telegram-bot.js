@@ -7,7 +7,9 @@
 // Variáveis de ambiente necessárias (veja README-bot.md):
 //   TELEGRAM_BOT_TOKEN, TELEGRAM_ALLOWED_IDS
 //   SONARR_URL, SONARR_API_KEY (opcional: SONARR_ROOT_FOLDER, SONARR_QUALITY_PROFILE)
-//   ANIME_BASE_DIR, FILME_BASE_DIR (opcionais, têm default)
+//   ANIME_BASE_DIR, FILME_BASE_DIR (opcionais, têm default — armazenamento interno)
+//   SD_ANIME_BASE_DIR, SD_FILME_BASE_DIR (opcionais, têm default — cartão SD,
+//     tem prioridade sobre o interno e deve encher primeiro)
 
 require("dotenv").config();
 const path = require("path");
@@ -21,6 +23,7 @@ const {
 const { translateTitle } = require("./anilist");
 const downloadQueue = require("./download");
 const sonarr = require("./sonarr");
+const { pickDirWithSpace, assertHasSpace, totalSize } = require("./disk-space");
 
 const BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
 if (!BOT_TOKEN) {
@@ -42,8 +45,16 @@ if (ALLOWED_IDS.length === 0) {
   process.exit(1);
 }
 
+// Cartão SD tem prioridade — deve encher antes do armazenamento interno.
+// A ordem dos arrays é a ordem de prioridade: pickDirWithSpace tenta o
+// primeiro, só cai pro próximo se não houver espaço.
+const SD_ANIME_BASE_DIR = process.env.SD_ANIME_BASE_DIR || "/storage/B3EE-1A06/Download/Animes";
+const SD_FILME_BASE_DIR = process.env.SD_FILME_BASE_DIR || "/storage/B3EE-1A06/Download/Filmes";
 const ANIME_BASE_DIR = process.env.ANIME_BASE_DIR || "/storage/emulated/0/Downloads/Animes";
 const FILME_BASE_DIR = process.env.FILME_BASE_DIR || "/storage/emulated/0/Downloads/Filmes";
+
+const ANIME_DIRS = [SD_ANIME_BASE_DIR, ANIME_BASE_DIR];
+const FILME_DIRS = [SD_FILME_BASE_DIR, FILME_BASE_DIR];
 
 const bot = new Telegraf(BOT_TOKEN);
 
@@ -641,13 +652,28 @@ bot.on("text", async (ctx, next) => {
 
   if (session.stage === "awaiting_season") {
     session.season = ctx.message.text.trim();
+    const requiredBytes = totalSize(session.selectedFiles);
+    let baseDir;
+    try {
+      baseDir = pickDirWithSpace(ANIME_DIRS, requiredBytes, session.padrao);
+    } catch (err) {
+      resetSession(ctx.chat.id);
+      return ctx.reply(`❌ ${err.message}`);
+    }
     session.renamed = buildRenamedList(session.selectedFiles, session.padrao, true, session.season);
-    session.finalDir = path.join(ANIME_BASE_DIR, session.padrao, `Season ${session.season}`);
+    session.finalDir = path.join(baseDir, session.padrao, `Season ${session.season}`);
     return triggerDownload(ctx, session);
   }
 
   if (session.stage === "awaiting_custom_dir") {
     const baseDir = ctx.message.text.trim();
+    const requiredBytes = totalSize(session.selectedFiles);
+    try {
+      assertHasSpace(baseDir, requiredBytes, session.padrao);
+    } catch (err) {
+      resetSession(ctx.chat.id);
+      return ctx.reply(`❌ ${err.message}`);
+    }
     session.renamed = buildRenamedList(session.selectedFiles, session.padrao, false, null);
     session.finalDir = path.join(baseDir, session.padrao);
     return triggerDownload(ctx, session);
@@ -666,8 +692,16 @@ bot.action("dest:animes", async (ctx) => {
 bot.action("dest:filmes", async (ctx) => {
   await ctx.answerCbQuery();
   const session = getSession(ctx.chat.id);
+  const requiredBytes = totalSize(session.selectedFiles);
+  let baseDir;
+  try {
+    baseDir = pickDirWithSpace(FILME_DIRS, requiredBytes, session.padrao);
+  } catch (err) {
+    resetSession(ctx.chat.id);
+    return ctx.reply(`❌ ${err.message}`);
+  }
   session.renamed = buildRenamedList(session.selectedFiles, session.padrao, false, null);
-  session.finalDir = path.join(FILME_BASE_DIR, session.padrao);
+  session.finalDir = path.join(baseDir, session.padrao);
   await triggerDownload(ctx, session);
 });
 

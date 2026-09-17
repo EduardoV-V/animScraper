@@ -21,6 +21,7 @@ const { spawn, spawnSync } = require("child_process");
 const { EventEmitter } = require("events");
 const axios = require("axios");
 const { ANITSU_BASE, getValidCookies, cookieHeader } = require("./session");
+const { assertHasSpace, totalSize } = require("./disk-space");
 
 function hasAria2() {
   const { status } = spawnSync("which", ["aria2c"]);
@@ -77,6 +78,12 @@ async function runJob(job) {
   events.emit("started", job);
 
   try {
+    // Revalida o espaço livre bem na hora de começar (não só quando o
+    // usuário escolheu o destino) — se o job ficou esperando na fila,
+    // outro download que rodou antes pode ter consumido o espaço que
+    // parecia suficiente antes.
+    assertHasSpace(job.finalDir, totalSize(job.files), job.label);
+
     fs.mkdirSync(job.finalDir, { recursive: true });
     // Revalida/renova a sessão no início DESTE job específico — garante
     // que cada download da fila começa com cookie fresco, mesmo que o
