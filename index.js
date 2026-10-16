@@ -7,10 +7,18 @@
 // A lógica de busca/navegação em si vive em core.js (compartilhada com o
 // bot do Telegram). Aqui só tem a camada de terminal (readline).
 
+const fs = require("fs");
 const path = require("path");
 const readline = require("readline");
 const { downloadAllAndWait } = require("./download");
-const { pickDirWithSpace, assertHasSpace, totalSize } = require("./disk-space");
+const {
+  pickDirWithSpace,
+  assertHasSpace,
+  totalSize,
+  findExistingDestination,
+  remainingBytes,
+  isMountAlive,
+} = require("./disk-space");
 const {
   humanSize,
   findAnimeMatches,
@@ -97,38 +105,75 @@ const SD_FILME_BASE_DIR = process.env.SD_FILME_BASE_DIR || "/storage/B3EE-1A06/D
 const ANIME_BASE_DIR = process.env.ANIME_BASE_DIR || "/storage/emulated/0/Downloads/Animes";
 const FILME_BASE_DIR = process.env.FILME_BASE_DIR || "/storage/emulated/0/Downloads/Filmes";
 
-const ANIME_DIRS = [SD_ANIME_BASE_DIR, ANIME_BASE_DIR];
-const FILME_DIRS = [SD_FILME_BASE_DIR, FILME_BASE_DIR];
+// Mountpoint de rede (sshfs) — mesma prioridade do cartão SD (os dois
+// devem encher antes do armazenamento interno). Só entra na lista se
+// estiver ativo agora (ver isMountAlive); senão é ignorado e cai pros
+// outros destinos normalmente.
+const MOUNT_POINT = process.env.MOUNT_POINT || "/mnt/celular2";
+const MOUNT_ANIME_BASE_DIR = process.env.MOUNT_ANIME_BASE_DIR || path.join(MOUNT_POINT, "Animes");
+const MOUNT_FILME_BASE_DIR = process.env.MOUNT_FILME_BASE_DIR || path.join(MOUNT_POINT, "Filmes");
+
+function getAnimeDirs() {
+  const dirs = [SD_ANIME_BASE_DIR];
+  if (isMountAlive(MOUNT_POINT)) dirs.push(MOUNT_ANIME_BASE_DIR);
+  dirs.push(ANIME_BASE_DIR);
+  return dirs;
+}
+
+function getFilmeDirs() {
+  const dirs = [SD_FILME_BASE_DIR];
+  if (isMountAlive(MOUNT_POINT)) dirs.push(MOUNT_FILME_BASE_DIR);
+  dirs.push(FILME_BASE_DIR);
+  return dirs;
+}
 
 async function chooseDestination(padrao, selectedFiles) {
   console.log("\n[1] Animes\n[2] Filmes\n[3] Digitar caminho manual");
   const dest = await ask("Destino: ");
 
-  const requiredBytes = totalSize(selectedFiles);
+  let isAnime = false;
+  let season = null;
+  let subPath; // caminho relativo dentro da base (usado pra achar pasta já existente)
 
-  let baseDir, isAnime = false;
   if (dest === "1") {
-    baseDir = pickDirWithSpace(ANIME_DIRS, requiredBytes, padrao);
     isAnime = true;
+    season = await ask("Temporada: ");
+    subPath = path.join(padrao, `Season ${String(season).padStart(2, "0")}`);
   } else if (dest === "2") {
-    baseDir = pickDirWithSpace(FILME_DIRS, requiredBytes, padrao);
-  } else if (dest === "3") {
-    baseDir = (await ask("Diretório base: ")).replace(/^~/, process.env.HOME || "");
-    assertHasSpace(baseDir, requiredBytes, padrao);
-  } else {
+    subPath = padrao;
+  } else if (dest !== "3") {
     throw new Error("Opção inválida.");
   }
 
-  let season = null;
+  // Precisa do nome renomeado já aqui pra poder comparar com o que
+  // eventualmente já está em disco (retomar download incompleto).
+  const renamed = buildRenamedList(selectedFiles, padrao, isAnime, season);
+  const filesWithNames = selectedFiles.map((f, i) => ({ outName: renamed[i], size: f.size }));
+
   let finalDir;
-  if (isAnime) {
-    season = await ask("Temporada: ");
-    finalDir = path.join(baseDir, padrao, `Season ${season}`);
+  if (dest === "1" || dest === "2") {
+    const dirs = dest === "1" ? getAnimeDirs() : getFilmeDirs();
+    const existingDir = findExistingDestination(dirs, subPath);
+    if (existingDir) {
+      console.log(`\n📁 Já existe download de "${padrao}" em ${existingDir} — continuando nele.`);
+      assertHasSpace(existingDir, remainingBytes(filesWithNames, existingDir), padrao);
+      finalDir = existingDir;
+    } else {
+      const baseDir = pickDirWithSpace(dirs, totalSize(selectedFiles), padrao);
+      finalDir = path.join(baseDir, subPath);
+    }
   } else {
+    const baseDir = (await ask("Diretório base: ")).replace(/^~/, process.env.HOME || "");
     finalDir = path.join(baseDir, padrao);
+    if (fs.existsSync(finalDir)) {
+      console.log(`\n📁 Já existe download de "${padrao}" em ${finalDir} — continuando nele.`);
+      assertHasSpace(finalDir, remainingBytes(filesWithNames, finalDir), padrao);
+    } else {
+      assertHasSpace(finalDir, totalSize(selectedFiles), padrao);
+    }
   }
 
-  return { finalDir, isAnime, season };
+  return { finalDir, isAnime, season, renamed };
 }
 
 async function main() {
@@ -159,8 +204,7 @@ async function main() {
   }
 
   const padrao = await ask("\nNome padrão: ");
-  const { finalDir, isAnime, season } = await chooseDestination(padrao, selected);
-  const renamed = buildRenamedList(selected, padrao, isAnime, season);
+  const { finalDir, renamed } = await chooseDestination(padrao, selected);
 
   const files = selected.map((f, i) => ({
     remotePath: `${targetPath}/${f.name}`,

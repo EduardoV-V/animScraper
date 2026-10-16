@@ -113,11 +113,104 @@ function assertHasSpace(dir, requiredBytes, label = "download") {
   }
 }
 
+// ------------------------------------------------------------------
+// Retomar download já iniciado antes (ex: faltou espaço no meio de um
+// download anterior e sobraram episódios pra baixar).
+// ------------------------------------------------------------------
+
+/**
+ * Procura, em cada `baseDirs` (na mesma ordem de prioridade usada pelo
+ * pickDirWithSpace — SD primeiro), se já existe uma pasta em
+ * `<base>/<subPath>`. Devolve o caminho completo da primeira que existir,
+ * ou null se essa combinação (anime/temporada) nunca foi baixada em
+ * nenhum dos destinos.
+ */
+function findExistingDestination(baseDirs, subPath) {
+  for (const base of baseDirs) {
+    const candidate = path.join(base, subPath);
+    if (fs.existsSync(candidate)) return candidate;
+  }
+  return null;
+}
+
+/** Bytes já presentes em disco pra um arquivo de saída específico dentro
+ * de `dir` (0 se ainda não existe). */
+function bytesOnDisk(dir, outName) {
+  try {
+    return fs.statSync(path.join(dir, outName)).size;
+  } catch {
+    return 0;
+  }
+}
+
+/**
+ * Quanto ainda falta baixar, em bytes, considerando o que já está em
+ * disco em `dir` pra cada arquivo (mesmo formato usado em download.js:
+ * { outName, size }). Arquivo já completo (ou o aria2 vai só confirmar
+ * isso rapidinho) conta 0; arquivo parcial conta só o restante; arquivo
+ * sem `size` conhecido conta 0 (não dá pra saber quanto falta).
+ */
+function remainingBytes(files, dir) {
+  return (files || []).reduce((sum, f) => {
+    const expected = f.size || 0;
+    if (!expected) return sum;
+    const onDisk = bytesOnDisk(dir, f.outName);
+    return sum + Math.max(0, expected - onDisk);
+  }, 0);
+}
+
+// ------------------------------------------------------------------
+// Mountpoint de rede (ex: sshfs) — precisa confirmar que está ativo
+// antes de usá-lo, já que pode cair a qualquer momento (perda de rede,
+// SSH derrubado etc).
+// ------------------------------------------------------------------
+
+const MOUNT_CHECK_TTL_MS = 30 * 1000; // evita rechecar várias vezes no mesmo fluxo de download
+const mountAliveCache = new Map(); // mountPath -> { alive, checkedAt }
+
+/**
+ * Confere se `mountPath` está montado e respondendo, rodando `df` nele
+ * com timeout (a própria opção `timeout` do execFileSync mata o
+ * processo se travar — importante pra sshfs, que em vez de dar erro na
+ * hora pode simplesmente travar a chamada se a rede cair no meio).
+ * `df` com sucesso já confirma as duas coisas de uma vez: que tem algo
+ * montado ali E que está respondendo (não só "a pasta existe").
+ *
+ * Resultado cacheado por MOUNT_CHECK_TTL_MS — não faz sentido rechecar a
+ * cada etapa do mesmo fluxo de download (busca -> seleção -> destino).
+ */
+function isMountAlive(mountPath, { timeoutMs = 4000, useCache = true } = {}) {
+  if (useCache) {
+    const cached = mountAliveCache.get(mountPath);
+    if (cached && Date.now() - cached.checkedAt < MOUNT_CHECK_TTL_MS) {
+      return cached.alive;
+    }
+  }
+
+  let alive;
+  try {
+    execFileSync("df", ["-Pk", mountPath], {
+      encoding: "utf8",
+      timeout: timeoutMs,
+      stdio: ["ignore", "pipe", "ignore"], // não deixa o erro do df (esperado quando o mount tá fora do ar) poluir o log
+    });
+    alive = true;
+  } catch {
+    alive = false;
+  }
+
+  mountAliveCache.set(mountPath, { alive, checkedAt: Date.now() });
+  return alive;
+}
+
 module.exports = {
   getFreeBytes,
   totalSize,
   humanBytes,
   pickDirWithSpace,
   assertHasSpace,
+  findExistingDestination,
+  remainingBytes,
+  isMountAlive,
   SAFETY_MARGIN_BYTES,
 };

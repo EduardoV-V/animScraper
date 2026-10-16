@@ -3,13 +3,606 @@ nohup: ignoring input
 > anitsu-cli@1.0.0 bot
 > node telegram-bot.js
 
+[auto-refresh] Ligado — checando a validade do cookie a cada 10 min.
+Busca por "Shinpuru na Hitobito" falhou: Falha na API (503) em /api/search
+Busca por "Simple People" falhou: Falha na API (503) em /api/search
+Busca por "The Blind Alchemist" falhou: Falha na API (503) em /api/search
+Busca por "Shinpuru na Hitobito" falhou: Falha na API (503) em /api/search
 nohup: ignoring input
 
 > anitsu-cli@1.0.0 bot
 > node telegram-bot.js
 
+[auto-refresh] Ligado — checando a validade do cookie a cada 10 min.
+/data/data/com.termux/files/home/teste/node_modules/telegraf/lib/core/network/client.js:315
+            throw new error_1.default(data, { method, payload });
+                  ^
+
+TelegramError: 409: Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+    at Telegram.callApi (/data/data/com.termux/files/home/teste/node_modules/telegraf/lib/core/network/client.js:315:19)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async [Symbol.asyncIterator] (/data/data/com.termux/files/home/teste/node_modules/telegraf/lib/core/network/polling.js:30:33)
+    at async Polling.loop (/data/data/com.termux/files/home/teste/node_modules/telegraf/lib/core/network/polling.js:73:30)
+    at async Telegraf.launch (/data/data/com.termux/files/home/teste/node_modules/telegraf/lib/telegraf.js:194:13) {
+  response: {
+    ok: false,
+    error_code: 409,
+    description: 'Conflict: terminated by other getUpdates request; make sure that only one bot instance is running'
+  },
+  on: {
+    method: 'getUpdates',
+    payload: { timeout: 50, offset: 807946790, allowed_updates: [] }
+  }
+}
+
+Node.js v26.4.0
+[auto-refresh] Cookie expirado (checkup em background) — renovando...
+Sessão ausente ou expirada. Renovando...
+[debug] após abrir LOGIN_URL: https://anitsu.moe/ | título: "Anitsu"
+[debug] botão "Entrar com Discord" encontrado? true
+[debug] a sessão salva no perfil já está autenticada (redirecionou pra https://anitsu.moe/) — pulando fluxo de login.
+[debug] cookies capturados: sb-qzrxxwizigfdcpmwkztq-auth-token.0, sb-qzrxxwizigfdcpmwkztq-auth-token.1
+[auto-refresh] Cookie renovado com sucesso.
+[auto-refresh] Cookie expirado (checkup em background) — renovando...
+Sessão ausente ou expirada. Renovando...
+[debug] após abrir LOGIN_URL: https://anitsu.moe/ | título: "Anitsu"
+[debug] botão "Entrar com Discord" encontrado? true
+[debug] a sessão salva no perfil já está autenticada (redirecionou pra https://anitsu.moe/) — pulando fluxo de login.
+[debug] cookies capturados: sb-qzrxxwizigfdcpmwkztq-auth-token.1, sb-qzrxxwizigfdcpmwkztq-auth-token.0
+[auto-refresh] Cookie renovado com sucesso.
+[auto-refresh] Cookie expirado (checkup em background) — renovando...
+Sessão ausente ou expirada. Renovando...
+[debug] após abrir LOGIN_URL: https://anitsu.moe/ | título: "Anitsu"
+[debug] botão "Entrar com Discord" encontrado? true
+[debug] a sessão salva no perfil já está autenticada (redirecionou pra https://anitsu.moe/) — pulando fluxo de login.
+[debug] cookies capturados: sb-qzrxxwizigfdcpmwkztq-auth-token.0, sb-qzrxxwizigfdcpmwkztq-auth-token.1
+[auto-refresh] Cookie renovado com sucesso.
+[auto-refresh] Cookie expirado (checkup em background) — renovando...
+Sessão ausente ou expirada. Renovando...
+[debug] após abrir LOGIN_URL: https://anitsu.moe/ | título: "Anitsu"
+[debug] botão "Entrar com Discord" encontrado? true
+[debug] a sessão salva no perfil já está autenticada (redirecionou pra https://anitsu.moe/) — pulando fluxo de login.
+[debug] cookies capturados: sb-qzrxxwizigfdcpmwkztq-auth-token.1, sb-qzrxxwizigfdcpmwkztq-auth-token.0
+[auto-refresh] Cookie renovado com sucesso.
+[auto-refresh] Cookie expirado (checkup em background) — renovando...
+Sessão ausente ou expirada. Renovando...
+[debug] após abrir LOGIN_URL: https://anitsu.moe/ | título: "Anitsu"
+[debug] botão "Entrar com Discord" encontrado? true
+[debug] a sessão salva no perfil já está autenticada (redirecionou pra https://anitsu.moe/) — pulando fluxo de login.
+[debug] cookies capturados: sb-qzrxxwizigfdcpmwkztq-auth-token.0, sb-qzrxxwizigfdcpmwkztq-auth-token.1
+[auto-refresh] Cookie renovado com sucesso.
+[auto-refresh] Cookie expirado (checkup em background) — renovando...
+Sessão ausente ou expirada. Renovando...
+[debug] após abrir LOGIN_URL: https://anitsu.moe/ | título: "Anitsu"
+[debug] botão "Entrar com Discord" encontrado? true
+[debug] a sessão salva no perfil já está autenticada (redirecionou pra https://anitsu.moe/) — pulando fluxo de login.
+[debug] cookies capturados: sb-qzrxxwizigfdcpmwkztq-auth-token.1, sb-qzrxxwizigfdcpmwkztq-auth-token.0
+[auto-refresh] Cookie renovado com sucesso.
+[auto-refresh] Cookie expirado (checkup em background) — renovando...
+Sessão ausente ou expirada. Renovando...
+[debug] após abrir LOGIN_URL: https://anitsu.moe/ | título: "Anitsu"
+[debug] botão "Entrar com Discord" encontrado? true
+[debug] a sessão salva no perfil já está autenticada (redirecionou pra https://anitsu.moe/) — pulando fluxo de login.
+[debug] cookies capturados: sb-qzrxxwizigfdcpmwkztq-auth-token.0, sb-qzrxxwizigfdcpmwkztq-auth-token.1
+[auto-refresh] Cookie renovado com sucesso.
+[auto-refresh] Cookie expirado (checkup em background) — renovando...
+Sessão ausente ou expirada. Renovando...
+[debug] após abrir LOGIN_URL: https://anitsu.moe/login/ | título: "Anitsu"
+[debug] botão "Entrar com Discord" encontrado? false
+[debug] campo de e-mail do Discord encontrado? false
+[debug] sem tela de autorização extra em: https://anitsu.moe/
+[debug] cookies capturados: sb-qzrxxwizigfdcpmwkztq-auth-token.1, sb-qzrxxwizigfdcpmwkztq-auth-token.0
+[auto-refresh] Cookie renovado com sucesso.
+[auto-refresh] Cookie expirado (checkup em background) — renovando...
+Sessão ausente ou expirada. Renovando...
+[debug] após abrir LOGIN_URL: https://anitsu.moe/ | título: "Anitsu"
+[debug] botão "Entrar com Discord" encontrado? true
+[debug] a sessão salva no perfil já está autenticada (redirecionou pra https://anitsu.moe/) — pulando fluxo de login.
+[debug] cookies capturados: sb-qzrxxwizigfdcpmwkztq-auth-token.1, sb-qzrxxwizigfdcpmwkztq-auth-token.0
+[auto-refresh] Cookie renovado com sucesso.
+[auto-refresh] Cookie expirado (checkup em background) — renovando...
+Sessão ausente ou expirada. Renovando...
+[debug] após abrir LOGIN_URL: https://anitsu.moe/ | título: "Anitsu"
+[debug] botão "Entrar com Discord" encontrado? true
+[debug] a sessão salva no perfil já está autenticada (redirecionou pra https://anitsu.moe/) — pulando fluxo de login.
+[debug] cookies capturados: sb-qzrxxwizigfdcpmwkztq-auth-token.1, sb-qzrxxwizigfdcpmwkztq-auth-token.0
+[auto-refresh] Cookie renovado com sucesso.
+[auto-refresh] Cookie expirado (checkup em background) — renovando...
+Sessão ausente ou expirada. Renovando...
+[debug] após abrir LOGIN_URL: https://anitsu.moe/ | título: "Anitsu"
+[debug] botão "Entrar com Discord" encontrado? true
+[debug] a sessão salva no perfil já está autenticada (redirecionou pra https://anitsu.moe/) — pulando fluxo de login.
+[debug] cookies capturados: sb-qzrxxwizigfdcpmwkztq-auth-token.0, sb-qzrxxwizigfdcpmwkztq-auth-token.1
+[auto-refresh] Cookie renovado com sucesso.
+[auto-refresh] Cookie expirado (checkup em background) — renovando...
+Sessão ausente ou expirada. Renovando...
+[debug] após abrir LOGIN_URL: https://anitsu.moe/login/ | título: "Anitsu"
+[debug] botão "Entrar com Discord" encontrado? false
+[debug] campo de e-mail do Discord encontrado? false
+[debug] sem tela de autorização extra em: https://anitsu.moe/
+[debug] cookies capturados: sb-qzrxxwizigfdcpmwkztq-auth-token.1, sb-qzrxxwizigfdcpmwkztq-auth-token.0
+[auto-refresh] Cookie renovado com sucesso.
+[auto-refresh] Cookie expirado (checkup em background) — renovando...
+Sessão ausente ou expirada. Renovando...
+[debug] após abrir LOGIN_URL: https://anitsu.moe/ | título: "Anitsu"
+[debug] botão "Entrar com Discord" encontrado? true
+[debug] a sessão salva no perfil já está autenticada (redirecionou pra https://anitsu.moe/) — pulando fluxo de login.
+[debug] cookies capturados: sb-qzrxxwizigfdcpmwkztq-auth-token.0, sb-qzrxxwizigfdcpmwkztq-auth-token.1
+[auto-refresh] Cookie renovado com sucesso.
+[auto-refresh] Cookie expirado (checkup em background) — renovando...
+Sessão ausente ou expirada. Renovando...
+[debug] após abrir LOGIN_URL: https://anitsu.moe/ | título: "Anitsu"
+[debug] botão "Entrar com Discord" encontrado? true
+[debug] a sessão salva no perfil já está autenticada (redirecionou pra https://anitsu.moe/) — pulando fluxo de login.
+[debug] cookies capturados: sb-qzrxxwizigfdcpmwkztq-auth-token.0, sb-qzrxxwizigfdcpmwkztq-auth-token.1
+[auto-refresh] Cookie renovado com sucesso.
+Healthcheck falhou por rede (não por autenticação) — assumindo sessão válida por ora.
+[auto-refresh] Cookie expirado (checkup em background) — renovando...
+Sessão ausente ou expirada. Renovando...
+[debug] após abrir LOGIN_URL: https://anitsu.moe/login/ | título: "Anitsu"
+[debug] botão "Entrar com Discord" encontrado? true
+[debug] a sessão salva no perfil já está autenticada (redirecionou pra https://anitsu.moe/) — pulando fluxo de login.
+[debug] cookies capturados: sb-qzrxxwizigfdcpmwkztq-auth-token.1, sb-qzrxxwizigfdcpmwkztq-auth-token.0
+[auto-refresh] Cookie renovado com sucesso.
+[auto-refresh] Cookie expirado (checkup em background) — renovando...
+Sessão ausente ou expirada. Renovando...
+[debug] após abrir LOGIN_URL: https://anitsu.moe/login/ | título: "Anitsu"
+[debug] botão "Entrar com Discord" encontrado? false
+[debug] campo de e-mail do Discord encontrado? false
+[debug] sem tela de autorização extra em: https://anitsu.moe/login/
+[debug] cookies capturados: sb-qzrxxwizigfdcpmwkztq-auth-token.1, sb-qzrxxwizigfdcpmwkztq-auth-token.0
+[auto-refresh] Cookie renovado com sucesso.
+[auto-refresh] Cookie expirado (checkup em background) — renovando...
+Sessão ausente ou expirada. Renovando...
+[debug] após abrir LOGIN_URL: https://anitsu.moe/login/ | título: "Anitsu"
+[debug] botão "Entrar com Discord" encontrado? false
+[debug] campo de e-mail do Discord encontrado? false
+[debug] sem tela de autorização extra em: https://anitsu.moe/
+[debug] cookies capturados: sb-qzrxxwizigfdcpmwkztq-auth-token.1, sb-qzrxxwizigfdcpmwkztq-auth-token.0
+[auto-refresh] Cookie renovado com sucesso.
+[auto-refresh] Cookie expirado (checkup em background) — renovando...
+Sessão ausente ou expirada. Renovando...
+[debug] após abrir LOGIN_URL: https://anitsu.moe/ | título: "Anitsu"
+[debug] botão "Entrar com Discord" encontrado? true
+[debug] a sessão salva no perfil já está autenticada (redirecionou pra https://anitsu.moe/) — pulando fluxo de login.
+[debug] cookies capturados: sb-qzrxxwizigfdcpmwkztq-auth-token.1, sb-qzrxxwizigfdcpmwkztq-auth-token.0
+[auto-refresh] Cookie renovado com sucesso.
+[auto-refresh] Cookie expirado (checkup em background) — renovando...
+Sessão ausente ou expirada. Renovando...
+[debug] após abrir LOGIN_URL: https://anitsu.moe/ | título: "Anitsu"
+[debug] botão "Entrar com Discord" encontrado? true
+[debug] a sessão salva no perfil já está autenticada (redirecionou pra https://anitsu.moe/) — pulando fluxo de login.
+[debug] cookies capturados: sb-qzrxxwizigfdcpmwkztq-auth-token.0, sb-qzrxxwizigfdcpmwkztq-auth-token.1
+[auto-refresh] Cookie renovado com sucesso.
+[auto-refresh] Cookie expirado (checkup em background) — renovando...
+Sessão ausente ou expirada. Renovando...
+[debug] após abrir LOGIN_URL: https://anitsu.moe/ | título: "Anitsu"
+[debug] botão "Entrar com Discord" encontrado? true
+[debug] a sessão salva no perfil já está autenticada (redirecionou pra https://anitsu.moe/) — pulando fluxo de login.
+[debug] cookies capturados: sb-qzrxxwizigfdcpmwkztq-auth-token.1, sb-qzrxxwizigfdcpmwkztq-auth-token.0
+[auto-refresh] Cookie renovado com sucesso.
+[auto-refresh] Cookie expirado (checkup em background) — renovando...
+Sessão ausente ou expirada. Renovando...
+[debug] após abrir LOGIN_URL: https://anitsu.moe/ | título: "Anitsu"
+[debug] botão "Entrar com Discord" encontrado? true
+[debug] a sessão salva no perfil já está autenticada (redirecionou pra https://anitsu.moe/) — pulando fluxo de login.
+[debug] cookies capturados: sb-qzrxxwizigfdcpmwkztq-auth-token.0, sb-qzrxxwizigfdcpmwkztq-auth-token.1
+[auto-refresh] Cookie renovado com sucesso.
+[auto-refresh] Cookie expirado (checkup em background) — renovando...
+Sessão ausente ou expirada. Renovando...
+[debug] após abrir LOGIN_URL: https://anitsu.moe/ | título: "Anitsu"
+[debug] botão "Entrar com Discord" encontrado? true
+[debug] a sessão salva no perfil já está autenticada (redirecionou pra https://anitsu.moe/) — pulando fluxo de login.
+[debug] cookies capturados: sb-qzrxxwizigfdcpmwkztq-auth-token.0, sb-qzrxxwizigfdcpmwkztq-auth-token.1
+[auto-refresh] Cookie renovado com sucesso.
+[auto-refresh] Cookie expirado (checkup em background) — renovando...
+Sessão ausente ou expirada. Renovando...
+[debug] após abrir LOGIN_URL: https://anitsu.moe/ | título: "Anitsu"
+[debug] botão "Entrar com Discord" encontrado? true
+[debug] a sessão salva no perfil já está autenticada (redirecionou pra https://anitsu.moe/) — pulando fluxo de login.
+[debug] cookies capturados: sb-qzrxxwizigfdcpmwkztq-auth-token.1, sb-qzrxxwizigfdcpmwkztq-auth-token.0
+[auto-refresh] Cookie renovado com sucesso.
+[auto-refresh] Cookie expirado (checkup em background) — renovando...
+Sessão ausente ou expirada. Renovando...
+[debug] após abrir LOGIN_URL: https://anitsu.moe/ | título: "Anitsu"
+[debug] botão "Entrar com Discord" encontrado? true
+[debug] a sessão salva no perfil já está autenticada (redirecionou pra https://anitsu.moe/) — pulando fluxo de login.
+[debug] cookies capturados: sb-qzrxxwizigfdcpmwkztq-auth-token.0, sb-qzrxxwizigfdcpmwkztq-auth-token.1
+[auto-refresh] Cookie renovado com sucesso.
+[auto-refresh] Cookie expirado (checkup em background) — renovando...
+Sessão ausente ou expirada. Renovando...
+[debug] após abrir LOGIN_URL: https://anitsu.moe/ | título: "Anitsu"
+[debug] botão "Entrar com Discord" encontrado? true
+[debug] a sessão salva no perfil já está autenticada (redirecionou pra https://anitsu.moe/) — pulando fluxo de login.
+[debug] cookies capturados: sb-qzrxxwizigfdcpmwkztq-auth-token.0, sb-qzrxxwizigfdcpmwkztq-auth-token.1
+[auto-refresh] Cookie renovado com sucesso.
+[auto-refresh] Cookie expirado (checkup em background) — renovando...
+Sessão ausente ou expirada. Renovando...
+[debug] após abrir LOGIN_URL: https://anitsu.moe/ | título: "Anitsu"
+[debug] botão "Entrar com Discord" encontrado? true
+[debug] a sessão salva no perfil já está autenticada (redirecionou pra https://anitsu.moe/) — pulando fluxo de login.
+[debug] cookies capturados: sb-qzrxxwizigfdcpmwkztq-auth-token.1, sb-qzrxxwizigfdcpmwkztq-auth-token.0
+[auto-refresh] Cookie renovado com sucesso.
+[auto-refresh] Cookie expirado (checkup em background) — renovando...
+Sessão ausente ou expirada. Renovando...
+[debug] após abrir LOGIN_URL: https://anitsu.moe/ | título: "Anitsu"
+[debug] botão "Entrar com Discord" encontrado? true
+[debug] a sessão salva no perfil já está autenticada (redirecionou pra https://anitsu.moe/) — pulando fluxo de login.
+[debug] cookies capturados: sb-qzrxxwizigfdcpmwkztq-auth-token.0, sb-qzrxxwizigfdcpmwkztq-auth-token.1
+[auto-refresh] Cookie renovado com sucesso.
+[auto-refresh] Cookie expirado (checkup em background) — renovando...
+Sessão ausente ou expirada. Renovando...
+[debug] após abrir LOGIN_URL: https://anitsu.moe/ | título: "Anitsu"
+[debug] botão "Entrar com Discord" encontrado? true
+[debug] a sessão salva no perfil já está autenticada (redirecionou pra https://anitsu.moe/) — pulando fluxo de login.
+[debug] cookies capturados: sb-qzrxxwizigfdcpmwkztq-auth-token.1, sb-qzrxxwizigfdcpmwkztq-auth-token.0
+[auto-refresh] Cookie renovado com sucesso.
+[auto-refresh] Cookie expirado (checkup em background) — renovando...
+Sessão ausente ou expirada. Renovando...
+[debug] após abrir LOGIN_URL: https://anitsu.moe/ | título: "Anitsu"
+[debug] botão "Entrar com Discord" encontrado? true
+[debug] a sessão salva no perfil já está autenticada (redirecionou pra https://anitsu.moe/) — pulando fluxo de login.
+[debug] cookies capturados: sb-qzrxxwizigfdcpmwkztq-auth-token.0, sb-qzrxxwizigfdcpmwkztq-auth-token.1
+[auto-refresh] Cookie renovado com sucesso.
+[auto-refresh] Cookie expirado (checkup em background) — renovando...
+Sessão ausente ou expirada. Renovando...
+[debug] após abrir LOGIN_URL: https://anitsu.moe/ | título: "Anitsu"
+[debug] botão "Entrar com Discord" encontrado? true
+[debug] a sessão salva no perfil já está autenticada (redirecionou pra https://anitsu.moe/) — pulando fluxo de login.
+[debug] cookies capturados: sb-qzrxxwizigfdcpmwkztq-auth-token.1, sb-qzrxxwizigfdcpmwkztq-auth-token.0
+[auto-refresh] Cookie renovado com sucesso.
+[auto-refresh] Cookie expirado (checkup em background) — renovando...
+Sessão ausente ou expirada. Renovando...
+[debug] após abrir LOGIN_URL: https://anitsu.moe/ | título: "Anitsu"
+[debug] botão "Entrar com Discord" encontrado? true
+[debug] a sessão salva no perfil já está autenticada (redirecionou pra https://anitsu.moe/) — pulando fluxo de login.
+[debug] cookies capturados: sb-qzrxxwizigfdcpmwkztq-auth-token.0, sb-qzrxxwizigfdcpmwkztq-auth-token.1
+[auto-refresh] Cookie renovado com sucesso.
+[auto-refresh] Cookie expirado (checkup em background) — renovando...
+Sessão ausente ou expirada. Renovando...
+[debug] após abrir LOGIN_URL: https://anitsu.moe/ | título: "Anitsu"
+[debug] botão "Entrar com Discord" encontrado? true
+[debug] a sessão salva no perfil já está autenticada (redirecionou pra https://anitsu.moe/) — pulando fluxo de login.
+[debug] cookies capturados: sb-qzrxxwizigfdcpmwkztq-auth-token.1, sb-qzrxxwizigfdcpmwkztq-auth-token.0
+[auto-refresh] Cookie renovado com sucesso.
+[auto-refresh] Cookie expirado (checkup em background) — renovando...
+Sessão ausente ou expirada. Renovando...
+[debug] após abrir LOGIN_URL: https://anitsu.moe/ | título: "Anitsu"
+[debug] botão "Entrar com Discord" encontrado? true
+[debug] a sessão salva no perfil já está autenticada (redirecionou pra https://anitsu.moe/) — pulando fluxo de login.
+[debug] cookies capturados: sb-qzrxxwizigfdcpmwkztq-auth-token.0, sb-qzrxxwizigfdcpmwkztq-auth-token.1
+[auto-refresh] Cookie renovado com sucesso.
+[auto-refresh] Cookie expirado (checkup em background) — renovando...
 Sessão ausente ou expirada. Renovando...
 [debug] após abrir LOGIN_URL: https://anitsu.moe/login/ | título: "Anitsu"
 [debug] botão "Entrar com Discord" encontrado? true
 [debug] a sessão salva no perfil já está autenticada (redirecionou pra https://anitsu.moe/) — pulando fluxo de login.
 [debug] cookies capturados: sb-qzrxxwizigfdcpmwkztq-auth-token.0, sb-qzrxxwizigfdcpmwkztq-auth-token.1
+[auto-refresh] Cookie renovado com sucesso.
+[auto-refresh] Cookie expirado (checkup em background) — renovando...
+Sessão ausente ou expirada. Renovando...
+[debug] após abrir LOGIN_URL: https://anitsu.moe/ | título: "Anitsu"
+[debug] botão "Entrar com Discord" encontrado? true
+[debug] a sessão salva no perfil já está autenticada (redirecionou pra https://anitsu.moe/) — pulando fluxo de login.
+[debug] cookies capturados: sb-qzrxxwizigfdcpmwkztq-auth-token.1, sb-qzrxxwizigfdcpmwkztq-auth-token.0
+[auto-refresh] Cookie renovado com sucesso.
+[auto-refresh] Cookie expirado (checkup em background) — renovando...
+Sessão ausente ou expirada. Renovando...
+[debug] após abrir LOGIN_URL: https://anitsu.moe/ | título: "Anitsu"
+[debug] botão "Entrar com Discord" encontrado? true
+[debug] a sessão salva no perfil já está autenticada (redirecionou pra https://anitsu.moe/) — pulando fluxo de login.
+[debug] cookies capturados: sb-qzrxxwizigfdcpmwkztq-auth-token.0, sb-qzrxxwizigfdcpmwkztq-auth-token.1
+[auto-refresh] Cookie renovado com sucesso.
+[auto-refresh] Cookie expirado (checkup em background) — renovando...
+Sessão ausente ou expirada. Renovando...
+[debug] após abrir LOGIN_URL: https://anitsu.moe/login/ | título: "Anitsu"
+[debug] botão "Entrar com Discord" encontrado? false
+[debug] campo de e-mail do Discord encontrado? false
+[debug] sem tela de autorização extra em: https://anitsu.moe/
+[debug] cookies capturados: sb-qzrxxwizigfdcpmwkztq-auth-token.0, sb-qzrxxwizigfdcpmwkztq-auth-token.1
+[auto-refresh] Cookie renovado com sucesso.
+[auto-refresh] Cookie expirado (checkup em background) — renovando...
+Sessão ausente ou expirada. Renovando...
+[debug] após abrir LOGIN_URL: https://anitsu.moe/ | título: "Anitsu"
+[debug] botão "Entrar com Discord" encontrado? true
+[debug] a sessão salva no perfil já está autenticada (redirecionou pra https://anitsu.moe/) — pulando fluxo de login.
+[debug] cookies capturados: sb-qzrxxwizigfdcpmwkztq-auth-token.1, sb-qzrxxwizigfdcpmwkztq-auth-token.0
+[auto-refresh] Cookie renovado com sucesso.
+[auto-refresh] Cookie expirado (checkup em background) — renovando...
+Sessão ausente ou expirada. Renovando...
+[debug] após abrir LOGIN_URL: https://anitsu.moe/ | título: "Anitsu"
+[debug] botão "Entrar com Discord" encontrado? true
+[debug] a sessão salva no perfil já está autenticada (redirecionou pra https://anitsu.moe/) — pulando fluxo de login.
+[debug] cookies capturados: sb-qzrxxwizigfdcpmwkztq-auth-token.0, sb-qzrxxwizigfdcpmwkztq-auth-token.1
+[auto-refresh] Cookie renovado com sucesso.
+[auto-refresh] Cookie expirado (checkup em background) — renovando...
+Sessão ausente ou expirada. Renovando...
+[debug] após abrir LOGIN_URL: https://anitsu.moe/ | título: "Anitsu"
+[debug] botão "Entrar com Discord" encontrado? true
+[debug] a sessão salva no perfil já está autenticada (redirecionou pra https://anitsu.moe/) — pulando fluxo de login.
+[debug] cookies capturados: sb-qzrxxwizigfdcpmwkztq-auth-token.0, sb-qzrxxwizigfdcpmwkztq-auth-token.1
+[auto-refresh] Cookie renovado com sucesso.
+[auto-refresh] Cookie expirado (checkup em background) — renovando...
+Sessão ausente ou expirada. Renovando...
+[debug] após abrir LOGIN_URL: https://anitsu.moe/ | título: "Anitsu"
+[debug] botão "Entrar com Discord" encontrado? true
+[debug] a sessão salva no perfil já está autenticada (redirecionou pra https://anitsu.moe/) — pulando fluxo de login.
+[debug] cookies capturados: sb-qzrxxwizigfdcpmwkztq-auth-token.1, sb-qzrxxwizigfdcpmwkztq-auth-token.0
+[auto-refresh] Cookie renovado com sucesso.
+[auto-refresh] Cookie expirado (checkup em background) — renovando...
+Sessão ausente ou expirada. Renovando...
+[debug] após abrir LOGIN_URL: https://anitsu.moe/ | título: "Anitsu"
+[debug] botão "Entrar com Discord" encontrado? true
+[debug] a sessão salva no perfil já está autenticada (redirecionou pra https://anitsu.moe/) — pulando fluxo de login.
+[debug] cookies capturados: sb-qzrxxwizigfdcpmwkztq-auth-token.1, sb-qzrxxwizigfdcpmwkztq-auth-token.0
+[auto-refresh] Cookie renovado com sucesso.
+[auto-refresh] Cookie expirado (checkup em background) — renovando...
+Sessão ausente ou expirada. Renovando...
+[debug] após abrir LOGIN_URL: https://anitsu.moe/ | título: "Anitsu"
+[debug] botão "Entrar com Discord" encontrado? true
+[debug] a sessão salva no perfil já está autenticada (redirecionou pra https://anitsu.moe/) — pulando fluxo de login.
+[debug] cookies capturados: sb-qzrxxwizigfdcpmwkztq-auth-token.0, sb-qzrxxwizigfdcpmwkztq-auth-token.1
+[auto-refresh] Cookie renovado com sucesso.
+[auto-refresh] Cookie expirado (checkup em background) — renovando...
+Sessão ausente ou expirada. Renovando...
+[debug] após abrir LOGIN_URL: https://anitsu.moe/ | título: "Anitsu"
+[debug] botão "Entrar com Discord" encontrado? true
+[debug] a sessão salva no perfil já está autenticada (redirecionou pra https://anitsu.moe/) — pulando fluxo de login.
+[debug] cookies capturados: sb-qzrxxwizigfdcpmwkztq-auth-token.0, sb-qzrxxwizigfdcpmwkztq-auth-token.1
+[auto-refresh] Cookie renovado com sucesso.
+[auto-refresh] Cookie expirado (checkup em background) — renovando...
+Sessão ausente ou expirada. Renovando...
+[debug] após abrir LOGIN_URL: https://anitsu.moe/ | título: "Anitsu"
+[debug] botão "Entrar com Discord" encontrado? true
+[debug] a sessão salva no perfil já está autenticada (redirecionou pra https://anitsu.moe/) — pulando fluxo de login.
+[debug] cookies capturados: sb-qzrxxwizigfdcpmwkztq-auth-token.1, sb-qzrxxwizigfdcpmwkztq-auth-token.0
+[auto-refresh] Cookie renovado com sucesso.
+[auto-refresh] Cookie expirado (checkup em background) — renovando...
+Sessão ausente ou expirada. Renovando...
+[debug] após abrir LOGIN_URL: https://anitsu.moe/ | título: "Anitsu"
+[debug] botão "Entrar com Discord" encontrado? true
+[debug] a sessão salva no perfil já está autenticada (redirecionou pra https://anitsu.moe/) — pulando fluxo de login.
+[debug] cookies capturados: sb-qzrxxwizigfdcpmwkztq-auth-token.0, sb-qzrxxwizigfdcpmwkztq-auth-token.1
+[auto-refresh] Cookie renovado com sucesso.
+[auto-refresh] Cookie expirado (checkup em background) — renovando...
+Sessão ausente ou expirada. Renovando...
+[debug] após abrir LOGIN_URL: https://anitsu.moe/ | título: "Anitsu"
+[debug] botão "Entrar com Discord" encontrado? true
+[debug] a sessão salva no perfil já está autenticada (redirecionou pra https://anitsu.moe/) — pulando fluxo de login.
+[debug] cookies capturados: sb-qzrxxwizigfdcpmwkztq-auth-token.1, sb-qzrxxwizigfdcpmwkztq-auth-token.0
+[auto-refresh] Cookie renovado com sucesso.
+[auto-refresh] Cookie expirado (checkup em background) — renovando...
+Sessão ausente ou expirada. Renovando...
+[debug] após abrir LOGIN_URL: https://anitsu.moe/ | título: "Anitsu"
+[debug] botão "Entrar com Discord" encontrado? true
+[debug] a sessão salva no perfil já está autenticada (redirecionou pra https://anitsu.moe/) — pulando fluxo de login.
+[debug] cookies capturados: sb-qzrxxwizigfdcpmwkztq-auth-token.1, sb-qzrxxwizigfdcpmwkztq-auth-token.0
+[auto-refresh] Cookie renovado com sucesso.
+[auto-refresh] Cookie expirado (checkup em background) — renovando...
+Sessão ausente ou expirada. Renovando...
+[debug] após abrir LOGIN_URL: https://anitsu.moe/ | título: "Anitsu"
+[debug] botão "Entrar com Discord" encontrado? true
+[debug] a sessão salva no perfil já está autenticada (redirecionou pra https://anitsu.moe/) — pulando fluxo de login.
+[debug] cookies capturados: sb-qzrxxwizigfdcpmwkztq-auth-token.0, sb-qzrxxwizigfdcpmwkztq-auth-token.1
+[auto-refresh] Cookie renovado com sucesso.
+[auto-refresh] Cookie expirado (checkup em background) — renovando...
+Sessão ausente ou expirada. Renovando...
+[debug] após abrir LOGIN_URL: https://anitsu.moe/ | título: "Anitsu"
+[debug] botão "Entrar com Discord" encontrado? true
+[debug] a sessão salva no perfil já está autenticada (redirecionou pra https://anitsu.moe/) — pulando fluxo de login.
+[debug] cookies capturados: sb-qzrxxwizigfdcpmwkztq-auth-token.1, sb-qzrxxwizigfdcpmwkztq-auth-token.0
+[auto-refresh] Cookie renovado com sucesso.
+[auto-refresh] Cookie expirado (checkup em background) — renovando...
+Sessão ausente ou expirada. Renovando...
+[debug] após abrir LOGIN_URL: https://anitsu.moe/ | título: "Anitsu"
+[debug] botão "Entrar com Discord" encontrado? true
+[debug] a sessão salva no perfil já está autenticada (redirecionou pra https://anitsu.moe/) — pulando fluxo de login.
+[debug] cookies capturados: sb-qzrxxwizigfdcpmwkztq-auth-token.0, sb-qzrxxwizigfdcpmwkztq-auth-token.1
+[auto-refresh] Cookie renovado com sucesso.
+[auto-refresh] Cookie expirado (checkup em background) — renovando...
+Sessão ausente ou expirada. Renovando...
+[debug] após abrir LOGIN_URL: https://anitsu.moe/ | título: "Anitsu"
+[debug] botão "Entrar com Discord" encontrado? true
+[debug] a sessão salva no perfil já está autenticada (redirecionou pra https://anitsu.moe/) — pulando fluxo de login.
+[debug] cookies capturados: sb-qzrxxwizigfdcpmwkztq-auth-token.0, sb-qzrxxwizigfdcpmwkztq-auth-token.1
+[auto-refresh] Cookie renovado com sucesso.
+[auto-refresh] Cookie expirado (checkup em background) — renovando...
+Sessão ausente ou expirada. Renovando...
+[debug] após abrir LOGIN_URL: https://anitsu.moe/ | título: "Anitsu"
+[debug] botão "Entrar com Discord" encontrado? true
+[debug] a sessão salva no perfil já está autenticada (redirecionou pra https://anitsu.moe/) — pulando fluxo de login.
+[debug] cookies capturados: sb-qzrxxwizigfdcpmwkztq-auth-token.1, sb-qzrxxwizigfdcpmwkztq-auth-token.0
+[auto-refresh] Cookie renovado com sucesso.
+[auto-refresh] Cookie expirado (checkup em background) — renovando...
+Sessão ausente ou expirada. Renovando...
+[debug] após abrir LOGIN_URL: https://anitsu.moe/ | título: "Anitsu"
+[debug] botão "Entrar com Discord" encontrado? true
+[debug] a sessão salva no perfil já está autenticada (redirecionou pra https://anitsu.moe/) — pulando fluxo de login.
+[debug] cookies capturados: sb-qzrxxwizigfdcpmwkztq-auth-token.0, sb-qzrxxwizigfdcpmwkztq-auth-token.1
+[auto-refresh] Cookie renovado com sucesso.
+[auto-refresh] Cookie expirado (checkup em background) — renovando...
+Sessão ausente ou expirada. Renovando...
+[debug] após abrir LOGIN_URL: https://anitsu.moe/login/ | título: "Anitsu"
+[debug] botão "Entrar com Discord" encontrado? false
+[debug] campo de e-mail do Discord encontrado? false
+[debug] sem tela de autorização extra em: https://anitsu.moe/
+[debug] cookies capturados: sb-qzrxxwizigfdcpmwkztq-auth-token.0, sb-qzrxxwizigfdcpmwkztq-auth-token.1
+[auto-refresh] Cookie renovado com sucesso.
+[auto-refresh] Cookie expirado (checkup em background) — renovando...
+Sessão ausente ou expirada. Renovando...
+[debug] após abrir LOGIN_URL: https://anitsu.moe/ | título: "Anitsu"
+[debug] botão "Entrar com Discord" encontrado? true
+[debug] a sessão salva no perfil já está autenticada (redirecionou pra https://anitsu.moe/) — pulando fluxo de login.
+[debug] cookies capturados: sb-qzrxxwizigfdcpmwkztq-auth-token.0, sb-qzrxxwizigfdcpmwkztq-auth-token.1
+[auto-refresh] Cookie renovado com sucesso.
+[auto-refresh] Cookie expirado (checkup em background) — renovando...
+Sessão ausente ou expirada. Renovando...
+[debug] após abrir LOGIN_URL: https://anitsu.moe/ | título: "Anitsu"
+[debug] botão "Entrar com Discord" encontrado? true
+[debug] a sessão salva no perfil já está autenticada (redirecionou pra https://anitsu.moe/) — pulando fluxo de login.
+[debug] cookies capturados: sb-qzrxxwizigfdcpmwkztq-auth-token.0, sb-qzrxxwizigfdcpmwkztq-auth-token.1
+[auto-refresh] Cookie renovado com sucesso.
+Healthcheck falhou por rede (não por autenticação) — assumindo sessão válida por ora.
+[auto-refresh] Cookie expirado (checkup em background) — renovando...
+Sessão ausente ou expirada. Renovando...
+[debug] após abrir LOGIN_URL: https://anitsu.moe/ | título: "Anitsu"
+[debug] botão "Entrar com Discord" encontrado? true
+[debug] a sessão salva no perfil já está autenticada (redirecionou pra https://anitsu.moe/) — pulando fluxo de login.
+[debug] cookies capturados: sb-qzrxxwizigfdcpmwkztq-auth-token.1, sb-qzrxxwizigfdcpmwkztq-auth-token.0
+[auto-refresh] Cookie renovado com sucesso.
+[auto-refresh] Cookie expirado (checkup em background) — renovando...
+Sessão ausente ou expirada. Renovando...
+[debug] após abrir LOGIN_URL: https://anitsu.moe/ | título: "Anitsu"
+[debug] botão "Entrar com Discord" encontrado? true
+[debug] a sessão salva no perfil já está autenticada (redirecionou pra https://anitsu.moe/) — pulando fluxo de login.
+[debug] cookies capturados: sb-qzrxxwizigfdcpmwkztq-auth-token.1, sb-qzrxxwizigfdcpmwkztq-auth-token.0
+[auto-refresh] Cookie renovado com sucesso.
+[auto-refresh] Cookie expirado (checkup em background) — renovando...
+Sessão ausente ou expirada. Renovando...
+[debug] após abrir LOGIN_URL: https://anitsu.moe/ | título: "Anitsu"
+[debug] botão "Entrar com Discord" encontrado? true
+[debug] a sessão salva no perfil já está autenticada (redirecionou pra https://anitsu.moe/) — pulando fluxo de login.
+[debug] cookies capturados: sb-qzrxxwizigfdcpmwkztq-auth-token.0, sb-qzrxxwizigfdcpmwkztq-auth-token.1
+[auto-refresh] Cookie renovado com sucesso.
+[auto-refresh] Cookie expirado (checkup em background) — renovando...
+Sessão ausente ou expirada. Renovando...
+[debug] após abrir LOGIN_URL: https://anitsu.moe/ | título: "Anitsu"
+[debug] botão "Entrar com Discord" encontrado? true
+[debug] a sessão salva no perfil já está autenticada (redirecionou pra https://anitsu.moe/) — pulando fluxo de login.
+[debug] cookies capturados: sb-qzrxxwizigfdcpmwkztq-auth-token.1, sb-qzrxxwizigfdcpmwkztq-auth-token.0
+[auto-refresh] Cookie renovado com sucesso.
+Healthcheck falhou por rede (não por autenticação) — assumindo sessão válida por ora.
+[auto-refresh] Cookie expirado (checkup em background) — renovando...
+Sessão ausente ou expirada. Renovando...
+[debug] após abrir LOGIN_URL: https://anitsu.moe/ | título: "Anitsu"
+[debug] botão "Entrar com Discord" encontrado? true
+[debug] a sessão salva no perfil já está autenticada (redirecionou pra https://anitsu.moe/) — pulando fluxo de login.
+[debug] cookies capturados: sb-qzrxxwizigfdcpmwkztq-auth-token.0, sb-qzrxxwizigfdcpmwkztq-auth-token.1
+[auto-refresh] Cookie renovado com sucesso.
+Healthcheck falhou por rede (não por autenticação) — assumindo sessão válida por ora.
+[auto-refresh] Cookie expirado (checkup em background) — renovando...
+Sessão ausente ou expirada. Renovando...
+[debug] após abrir LOGIN_URL: https://anitsu.moe/ | título: "Anitsu"
+[debug] botão "Entrar com Discord" encontrado? true
+[debug] a sessão salva no perfil já está autenticada (redirecionou pra https://anitsu.moe/) — pulando fluxo de login.
+[debug] cookies capturados: sb-qzrxxwizigfdcpmwkztq-auth-token.0, sb-qzrxxwizigfdcpmwkztq-auth-token.1
+[auto-refresh] Cookie renovado com sucesso.
+[auto-refresh] Cookie expirado (checkup em background) — renovando...
+Sessão ausente ou expirada. Renovando...
+[debug] após abrir LOGIN_URL: https://anitsu.moe/ | título: "Anitsu"
+[debug] botão "Entrar com Discord" encontrado? true
+[debug] a sessão salva no perfil já está autenticada (redirecionou pra https://anitsu.moe/) — pulando fluxo de login.
+[debug] cookies capturados: sb-qzrxxwizigfdcpmwkztq-auth-token.1, sb-qzrxxwizigfdcpmwkztq-auth-token.0
+[auto-refresh] Cookie renovado com sucesso.
+[auto-refresh] Cookie expirado (checkup em background) — renovando...
+Sessão ausente ou expirada. Renovando...
+[debug] após abrir LOGIN_URL: https://anitsu.moe/login/ | título: "Anitsu"
+[debug] botão "Entrar com Discord" encontrado? true
+[debug] a sessão salva no perfil já está autenticada (redirecionou pra https://anitsu.moe/) — pulando fluxo de login.
+[debug] cookies capturados: sb-qzrxxwizigfdcpmwkztq-auth-token.0, sb-qzrxxwizigfdcpmwkztq-auth-token.1
+[auto-refresh] Cookie renovado com sucesso.
+nohup: ignoring input
+
+> anitsu-cli@1.0.0 bot
+> node telegram-bot.js
+
+[auto-refresh] Ligado — checando a validade do cookie a cada 10 min.
+/data/data/com.termux/files/home/teste/node_modules/telegraf/lib/core/network/client.js:315
+            throw new error_1.default(data, { method, payload });
+                  ^
+
+TelegramError: 409: Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+    at Telegram.callApi (/data/data/com.termux/files/home/teste/node_modules/telegraf/lib/core/network/client.js:315:19)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async [Symbol.asyncIterator] (/data/data/com.termux/files/home/teste/node_modules/telegraf/lib/core/network/polling.js:30:33)
+    at async Polling.loop (/data/data/com.termux/files/home/teste/node_modules/telegraf/lib/core/network/polling.js:73:30)
+    at async Telegraf.launch (/data/data/com.termux/files/home/teste/node_modules/telegraf/lib/telegraf.js:194:13) {
+  response: {
+    ok: false,
+    error_code: 409,
+    description: 'Conflict: terminated by other getUpdates request; make sure that only one bot instance is running'
+  },
+  on: {
+    method: 'getUpdates',
+    payload: { timeout: 50, offset: 0, allowed_updates: [] }
+  }
+}
+
+Node.js v26.4.0
+[auto-refresh] Cookie expirado (checkup em background) — renovando...
+Sessão ausente ou expirada. Renovando...
+[debug] após abrir LOGIN_URL: https://anitsu.moe/ | título: "Anitsu"
+[debug] botão "Entrar com Discord" encontrado? true
+[debug] a sessão salva no perfil já está autenticada (redirecionou pra https://anitsu.moe/) — pulando fluxo de login.
+[debug] cookies capturados: sb-qzrxxwizigfdcpmwkztq-auth-token.0, sb-qzrxxwizigfdcpmwkztq-auth-token.1
+[auto-refresh] Cookie renovado com sucesso.
+[auto-refresh] Cookie expirado (checkup em background) — renovando...
+Sessão ausente ou expirada. Renovando...
+[debug] após abrir LOGIN_URL: https://anitsu.moe/ | título: "Anitsu"
+[debug] botão "Entrar com Discord" encontrado? true
+[debug] a sessão salva no perfil já está autenticada (redirecionou pra https://anitsu.moe/) — pulando fluxo de login.
+[debug] cookies capturados: sb-qzrxxwizigfdcpmwkztq-auth-token.0, sb-qzrxxwizigfdcpmwkztq-auth-token.1
+[auto-refresh] Cookie renovado com sucesso.
+[auto-refresh] Cookie expirado (checkup em background) — renovando...
+Sessão ausente ou expirada. Renovando...
+[debug] após abrir LOGIN_URL: https://anitsu.moe/login/ | título: "Anitsu"
+[debug] botão "Entrar com Discord" encontrado? true
+[debug] a sessão salva no perfil já está autenticada (redirecionou pra https://anitsu.moe/) — pulando fluxo de login.
+[debug] cookies capturados: sb-qzrxxwizigfdcpmwkztq-auth-token.1, sb-qzrxxwizigfdcpmwkztq-auth-token.0
+[auto-refresh] Cookie renovado com sucesso.
+nohup: ignoring input
+
+> anitsu-cli@1.0.0 bot
+> node telegram-bot.js
+
+[auto-refresh] Ligado — checando a validade do cookie a cada 10 min.
+[auto-refresh] Cookie expirado (checkup em background) — renovando...
+Sessão ausente ou expirada. Renovando...
+[bot] mensagem ignorada de id não autorizado: 1769318722
+[bot] mensagem ignorada de id não autorizado: 1769318722
+[bot] mensagem ignorada de id não autorizado: 1769318722
+[bot] mensagem ignorada de id não autorizado: 1769318722
+[debug] após abrir LOGIN_URL: https://anitsu.moe/ | título: "Anitsu"
+[debug] botão "Entrar com Discord" encontrado? true
+[debug] a sessão salva no perfil já está autenticada (redirecionou pra https://anitsu.moe/) — pulando fluxo de login.
+[debug] cookies capturados: sb-qzrxxwizigfdcpmwkztq-auth-token.0, sb-qzrxxwizigfdcpmwkztq-auth-token.1
+[auto-refresh] Cookie renovado com sucesso.
+[bot] mensagem ignorada de id não autorizado: 1769318722
+[bot] mensagem ignorada de id não autorizado: 1769318722
+[bot] mensagem ignorada de id não autorizado: 1769318722
+[bot] mensagem ignorada de id não autorizado: 7004152886
+[bot] mensagem ignorada de id não autorizado: 7004152886
+[bot] mensagem ignorada de id não autorizado: 7945314088
+[bot] mensagem ignorada de id não autorizado: 7945314088
+[bot] mensagem ignorada de id não autorizado: 7945314088
+[bot] mensagem ignorada de id não autorizado: 7945314088
+[bot] mensagem ignorada de id não autorizado: 7945314088
+[bot] mensagem ignorada de id não autorizado: 7945314088
+[bot] mensagem ignorada de id não autorizado: 7945314088
+[bot] mensagem ignorada de id não autorizado: 7945314088
+[bot] mensagem ignorada de id não autorizado: 7945314088
+[bot] mensagem ignorada de id não autorizado: 7945314088
+[bot] mensagem ignorada de id não autorizado: 7945314088
+[bot] mensagem ignorada de id não autorizado: 7945314088
+[bot] mensagem ignorada de id não autorizado: 7945314088
+[bot] mensagem ignorada de id não autorizado: 7945314088
+[bot] mensagem ignorada de id não autorizado: 7945314088
+[bot] mensagem ignorada de id não autorizado: 7945314088
+[bot] mensagem ignorada de id não autorizado: 7945314088
+[bot] mensagem ignorada de id não autorizado: 7945314088
+[auto-refresh] Cookie expirado (checkup em background) — renovando...
+Sessão ausente ou expirada. Renovando...
+[debug] após abrir LOGIN_URL: https://anitsu.moe/ | título: "Anitsu"
+[debug] botão "Entrar com Discord" encontrado? true
+[debug] a sessão salva no perfil já está autenticada (redirecionou pra https://anitsu.moe/) — pulando fluxo de login.
+[debug] cookies capturados: sb-qzrxxwizigfdcpmwkztq-auth-token.0, sb-qzrxxwizigfdcpmwkztq-auth-token.1
+[auto-refresh] Cookie renovado com sucesso.
+nohup: ignoring input
+
+> anitsu-cli@1.0.0 bot
+> node telegram-bot.js
+
+[auto-refresh] Ligado — checando a validade do cookie a cada 10 min.
+[bot] mensagem ignorada de id não autorizado: 8947312318
+[auto-refresh] Cookie expirado (checkup em background) — renovando...
+Sessão ausente ou expirada. Renovando...

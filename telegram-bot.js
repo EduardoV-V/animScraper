@@ -12,18 +12,33 @@
 //     tem prioridade sobre o interno e deve encher primeiro)
 
 require("dotenv").config();
+const fs = require("fs");
 const path = require("path");
 const { Telegraf, Markup } = require("telegraf");
 const {
   humanSize,
   getDirectoryView,
+  findAnimeMatches,
   findAnimeMatchesMulti,
   buildRenamedList,
 } = require("./core");
 const { translateTitle } = require("./anilist");
 const downloadQueue = require("./download");
 const sonarr = require("./sonarr");
-const { pickDirWithSpace, assertHasSpace, totalSize } = require("./disk-space");
+const { startAutoRefresh } = require("./session");
+const {
+  pickDirWithSpace,
+  assertHasSpace,
+  totalSize,
+  findExistingDestination,
+  remainingBytes,
+  isMountAlive,
+} = require("./disk-space");
+const {
+  detectExistingDownload,
+  pickLikelySeason,
+  guessSeasonNumberFromPath,
+} = require("./local-library");
 
 const BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
 if (!BOT_TOKEN) {
@@ -53,8 +68,41 @@ const SD_FILME_BASE_DIR = process.env.SD_FILME_BASE_DIR || "/storage/B3EE-1A06/D
 const ANIME_BASE_DIR = process.env.ANIME_BASE_DIR || "/storage/emulated/0/Downloads/Animes";
 const FILME_BASE_DIR = process.env.FILME_BASE_DIR || "/storage/emulated/0/Downloads/Filmes";
 
-const ANIME_DIRS = [SD_ANIME_BASE_DIR, ANIME_BASE_DIR];
-const FILME_DIRS = [SD_FILME_BASE_DIR, FILME_BASE_DIR];
+// Mountpoint de rede (sshfs) — mesma prioridade do cartão SD (os dois
+// devem encher antes do armazenamento interno). Como é uma montagem via
+// rede, pode cair a qualquer momento; por isso ele só entra nas listas
+// abaixo se `isMountAlive(MOUNT_POINT)` confirmar, na hora, que está
+// ativo — senão é ignorado e cai pros outros destinos normalmente.
+const MOUNT_POINT = process.env.MOUNT_POINT || "/mnt/celular2";
+// Nomes das subpastas dentro do mount — se a pasta de lá tiver nome
+// diferente ("Anime" no singular, por exemplo), ajuste via .env.
+const MOUNT_ANIME_BASE_DIR = process.env.MOUNT_ANIME_BASE_DIR || path.join(MOUNT_POINT, "Animes");
+const MOUNT_FILME_BASE_DIR = process.env.MOUNT_FILME_BASE_DIR || path.join(MOUNT_POINT, "Filmes");
+
+/** Monta a lista de diretórios de anime na ordem de prioridade certa —
+ * SD e mount (se estiver ativo agora) primeiro, interno por último —
+ * recalculada a cada chamada porque o mount pode subir/cair entre uma
+ * busca e outra. */
+function getAnimeDirs() {
+  const dirs = [SD_ANIME_BASE_DIR];
+  if (isMountAlive(MOUNT_POINT)) dirs.push(MOUNT_ANIME_BASE_DIR);
+  dirs.push(ANIME_BASE_DIR);
+  return dirs;
+}
+
+function getFilmeDirs() {
+  const dirs = [SD_FILME_BASE_DIR];
+  if (isMountAlive(MOUNT_POINT)) dirs.push(MOUNT_FILME_BASE_DIR);
+  dirs.push(FILME_BASE_DIR);
+  return dirs;
+}
+
+/** Usado só pra pré-checagem local (achar a pasta certa por nome) — olha
+ * as duas categorias porque, nesse ponto (logo após a busca), ainda não
+ * sabemos se o usuário vai marcar como anime ou filme. */
+function getAllLocalDirs() {
+  return [...getAnimeDirs(), ...getFilmeDirs()];
+}
 
 const bot = new Telegraf(BOT_TOKEN);
 
@@ -92,8 +140,26 @@ async function handleBuscar(ctx, termo) {
   const chatId = ctx.chat.id;
   await ctx.reply(`Buscando "${termo}" (incluindo variações de título via AniList)...`);
 
-  const variants = await translateTitle(termo);
-  const results = await findAnimeMatchesMulti(variants);
+  // Dispara a busca da query original (API oficial) e a tradução de
+  // título (AniList) em paralelo — não faz sentido esperar a AniList
+  // responder pra só então começar a buscar o que o usuário já digitou;
+  // as duas requisições não dependem uma da outra.
+  const [variants, ownResults] = await Promise.all([
+    translateTitle(termo),
+    findAnimeMatches(termo),
+  ]);
+
+  // Só busca as variações EXTRAS que a AniList trouxe (romaji, inglês,
+  // sinônimos) — a query original já foi buscada acima, não precisa
+  // repetir.
+  const extraVariants = variants.filter((v) => v !== termo);
+  const extraResults = extraVariants.length > 0 ? await findAnimeMatchesMulti(extraVariants) : [];
+
+  const seen = new Map();
+  for (const item of [...ownResults, ...extraResults]) {
+    if (!seen.has(item.path)) seen.set(item.path, item);
+  }
+  const results = Array.from(seen.values());
 
   if (results.length === 0) {
     return ctx.reply("Nenhum resultado encontrado.");
@@ -155,9 +221,25 @@ function renderVideoSelection(session) {
   return Markup.inlineKeyboard(buttons);
 }
 
+function destinationKeyboard() {
+  return Markup.inlineKeyboard([
+    [Markup.button.callback("📺 Animes (com temporada)", "dest:animes")],
+    [Markup.button.callback("🎬 Filmes", "dest:filmes")],
+    [Markup.button.callback("✏️ Caminho manual", "dest:custom")],
+    [Markup.button.callback("📝 Renomear", "rename")],
+  ]);
+}
+
 async function startDestinationFlow(ctx, session) {
-  session.stage = "awaiting_name";
-  await ctx.reply("Digite o nome padrão pra usar nos arquivos (ex: nome do anime):");
+  session.stage = "awaiting_destination";
+  // O nome já vem preenchido automaticamente desde a escolha do
+  // resultado da busca (pick:) — se já existia pasta local, usamos o
+  // nome real dela; senão, o nome que a busca trouxe. "Renomear" abre a
+  // opção de digitar outro nome na hora, pra quem quiser ajustar.
+  const note = session.localMatch
+    ? " (já existe pasta com esse nome — mantendo consistência)"
+    : " (nome detectado automaticamente pela busca)";
+  await ctx.reply(`📛 Nome: "${session.padrao}"${note}\n\nDestino:`, destinationKeyboard());
 }
 
 async function triggerDownload(ctx, session) {
@@ -391,6 +473,18 @@ bot.action(/^pick:(\d+)$/, async (ctx) => {
 
   session.rootPath = result.path;
   session.stage = "browsing";
+
+  // Detecção local (nome + pasta já existente) feita AQUI, antes de
+  // qualquer navegação — é só leitura de disco local (fs.readdirSync em
+  // no máximo 2 níveis), sem rede envolvida, então termina bem antes do
+  // usuário sequer terminar de navegar pelas pastas remotas.
+  session.localMatch = detectExistingDownload(result.name, getAllLocalDirs());
+  // Nome automático: se já existe uma pasta local pra esse anime, usa o
+  // nome REAL dela (mantém consistência com o que já foi baixado antes,
+  // já que o "continuar download" depende do nome bater certinho). Sem
+  // pasta existente, usa o nome que a própria busca trouxe.
+  session.padrao = session.localMatch ? session.localMatch.name : result.name;
+
   await enterDirectory(ctx, session, result.path);
 });
 
@@ -422,8 +516,57 @@ bot.action("dl", async (ctx) => {
   const session = getSession(ctx.chat.id);
   if (!session.dirView?.videos?.length) return;
   session.stage = "selecting_videos";
-  session.selected = new Set(session.dirView.videos.map((_, i) => i));
-  await ctx.reply("Selecione os vídeos (toque pra ligar/desligar):", renderVideoSelection(session));
+
+  // Decide qual temporada local comparar: primeiro tenta achar um número
+  // de temporada explícito no nome da pasta remota que o usuário está
+  // navegando (bem mais confiável); só cai pra heurística ("a temporada
+  // com mais episódios já baixados") se isso não for possível.
+  let relevantSeason = null;
+  let seasonGuessReason = null;
+  if (session.localMatch?.seasons?.length) {
+    const guessedNumber = guessSeasonNumberFromPath(session.currentPath);
+    if (guessedNumber != null) {
+      relevantSeason = session.localMatch.seasons.find((s) => s.season === guessedNumber) || null;
+      if (relevantSeason) seasonGuessReason = "pela pasta que você abriu";
+    }
+    if (!relevantSeason) {
+      relevantSeason = pickLikelySeason(session.localMatch.seasons);
+      if (relevantSeason) seasonGuessReason = "heurística — a com mais episódios já baixados, pode não ser a certa";
+    }
+  }
+  session.relevantLocalSeason = relevantSeason;
+
+  const localEpisodes = relevantSeason?.episodes; // completos — pode pular
+  const incompleteEpisodes = relevantSeason?.incompleteEpisodes; // .aria2 pendente — NÃO pula
+  session.selected = new Set(
+    session.dirView.videos.map((_, i) => i).filter((i) => {
+      const epNum = i + 1;
+      if (incompleteEpisodes?.has(epNum)) return true; // download parado no meio — mantém marcado pra retomar
+      if (localEpisodes?.has(epNum)) return false; // já completo — desmarca
+      return true; // nada local ainda — baixa normalmente
+    })
+  );
+
+  let note = "";
+  if (relevantSeason && ((localEpisodes?.size ?? 0) > 0 || (incompleteEpisodes?.size ?? 0) > 0)) {
+    const totalVideos = session.dirView.videos.length;
+    const completedCount = Array.from({ length: totalVideos }, (_, i) => i + 1).filter((ep) =>
+      localEpisodes?.has(ep)
+    ).length;
+    const pendingCount = Array.from({ length: totalVideos }, (_, i) => i + 1).filter((ep) =>
+      incompleteEpisodes?.has(ep)
+    ).length;
+
+    const bits = [];
+    if (completedCount > 0) bits.push(`${completedCount} já completo(s) (desmarquei)`);
+    if (pendingCount > 0) bits.push(`${pendingCount} com download incompleto (.aria2 pendente — mantive marcado pra retomar)`);
+
+    if (bits.length > 0) {
+      note = `\n\n📁 Em "${relevantSeason.name}" (${seasonGuessReason}): ${bits.join(", ")}. Confira antes de confirmar.`;
+    }
+  }
+
+  await ctx.reply(`Selecione os vídeos (toque pra ligar/desligar):${note}`, renderVideoSelection(session));
 });
 
 bot.action(/^vt:(\d+)$/, async (ctx) => {
@@ -446,13 +589,26 @@ bot.action("vall", async (ctx) => {
 bot.action("vconfirm", async (ctx) => {
   await ctx.answerCbQuery();
   const session = getSession(ctx.chat.id);
-  const selectedFiles = session.dirView.videos.filter((_, i) => session.selected.has(i));
-  if (selectedFiles.length === 0) return ctx.reply("Nenhum vídeo selecionado.");
-  session.selectedFiles = selectedFiles;
+  // Guarda o índice ORIGINAL (posição na listagem remota) de cada vídeo
+  // marcado — é isso que vira o número do episódio de verdade. Se
+  // pegássemos só a posição dentro da lista já filtrada, pular um
+  // episódio no meio (ex: o 3, porque já foi baixado antes) faria o
+  // episódio 4 virar "E03" por engano.
+  const selectedIndices = session.dirView.videos.map((_, i) => i).filter((i) => session.selected.has(i));
+  if (selectedIndices.length === 0) return ctx.reply("Nenhum vídeo selecionado.");
+  session.selectedFiles = selectedIndices.map((i) => session.dirView.videos[i]);
+  session.episodeNumbers = selectedIndices.map((i) => i + 1);
   await startDestinationFlow(ctx, session);
 });
 
 bot.action("noop", (ctx) => ctx.answerCbQuery());
+
+bot.action("rename", async (ctx) => {
+  await ctx.answerCbQuery();
+  const session = getSession(ctx.chat.id);
+  session.stage = "awaiting_name";
+  await ctx.reply("Digite o nome que quer usar pra essa série/filme:");
+});
 
 // ============================================================
 // Callbacks — Sonarr: adicionar série (tela de configuração)
@@ -640,42 +796,71 @@ bot.on("text", async (ctx, next) => {
   if (session.stage === "awaiting_name") {
     session.padrao = ctx.message.text.trim();
     session.stage = "awaiting_destination";
-    return ctx.reply(
-      "Destino:",
-      Markup.inlineKeyboard([
-        [Markup.button.callback("📺 Animes (com temporada)", "dest:animes")],
-        [Markup.button.callback("🎬 Filmes", "dest:filmes")],
-        [Markup.button.callback("✏️ Caminho manual", "dest:custom")],
-      ])
-    );
+    return ctx.reply("Destino:", destinationKeyboard());
   }
 
   if (session.stage === "awaiting_season") {
     session.season = ctx.message.text.trim();
-    const requiredBytes = totalSize(session.selectedFiles);
-    let baseDir;
+    session.renamed = buildRenamedList(
+      session.selectedFiles,
+      session.padrao,
+      true,
+      session.season,
+      session.episodeNumbers
+    );
+
+    const subPath = path.join(session.padrao, `Season ${String(session.season).padStart(2, "0")}`);
+    const animeDirs = getAnimeDirs();
+    const existingDir = findExistingDestination(animeDirs, subPath);
+    const filesWithNames = session.selectedFiles.map((f, i) => ({
+      outName: session.renamed[i],
+      size: f.size,
+    }));
+
     try {
-      baseDir = pickDirWithSpace(ANIME_DIRS, requiredBytes, session.padrao);
+      if (existingDir) {
+        // Já existe pasta com esse anime/temporada em algum dos destinos
+        // (SD, mount ou interno) — provavelmente um download anterior
+        // que não terminou por falta de espaço. Continua nela em vez de
+        // criar outra, e só cobra espaço pelo que realmente falta.
+        assertHasSpace(existingDir, remainingBytes(filesWithNames, existingDir), session.padrao);
+        session.finalDir = existingDir;
+        await ctx.reply(`📁 Já existe download de "${session.padrao}" em ${existingDir} — continuando nele.`);
+      } else {
+        const requiredBytes = totalSize(session.selectedFiles);
+        const baseDir = pickDirWithSpace(animeDirs, requiredBytes, session.padrao);
+        session.finalDir = path.join(baseDir, subPath);
+      }
     } catch (err) {
       resetSession(ctx.chat.id);
       return ctx.reply(`❌ ${err.message}`);
     }
-    session.renamed = buildRenamedList(session.selectedFiles, session.padrao, true, session.season);
-    session.finalDir = path.join(baseDir, session.padrao, `Season ${session.season}`);
     return triggerDownload(ctx, session);
   }
 
   if (session.stage === "awaiting_custom_dir") {
     const baseDir = ctx.message.text.trim();
-    const requiredBytes = totalSize(session.selectedFiles);
+    session.renamed = buildRenamedList(session.selectedFiles, session.padrao, false, null);
+
+    const finalDir = path.join(baseDir, session.padrao);
+    const filesWithNames = session.selectedFiles.map((f, i) => ({
+      outName: session.renamed[i],
+      size: f.size,
+    }));
+    const alreadyExists = fs.existsSync(finalDir);
+
     try {
-      assertHasSpace(baseDir, requiredBytes, session.padrao);
+      if (alreadyExists) {
+        assertHasSpace(finalDir, remainingBytes(filesWithNames, finalDir), session.padrao);
+        await ctx.reply(`📁 Já existe download de "${session.padrao}" em ${finalDir} — continuando nele.`);
+      } else {
+        assertHasSpace(finalDir, totalSize(session.selectedFiles), session.padrao);
+      }
     } catch (err) {
       resetSession(ctx.chat.id);
       return ctx.reply(`❌ ${err.message}`);
     }
-    session.renamed = buildRenamedList(session.selectedFiles, session.padrao, false, null);
-    session.finalDir = path.join(baseDir, session.padrao);
+    session.finalDir = finalDir;
     return triggerDownload(ctx, session);
   }
 
@@ -692,16 +877,29 @@ bot.action("dest:animes", async (ctx) => {
 bot.action("dest:filmes", async (ctx) => {
   await ctx.answerCbQuery();
   const session = getSession(ctx.chat.id);
-  const requiredBytes = totalSize(session.selectedFiles);
-  let baseDir;
+  session.renamed = buildRenamedList(session.selectedFiles, session.padrao, false, null);
+
+  const filmeDirs = getFilmeDirs();
+  const existingDir = findExistingDestination(filmeDirs, session.padrao);
+  const filesWithNames = session.selectedFiles.map((f, i) => ({
+    outName: session.renamed[i],
+    size: f.size,
+  }));
+
   try {
-    baseDir = pickDirWithSpace(FILME_DIRS, requiredBytes, session.padrao);
+    if (existingDir) {
+      assertHasSpace(existingDir, remainingBytes(filesWithNames, existingDir), session.padrao);
+      session.finalDir = existingDir;
+      await ctx.reply(`📁 Já existe download de "${session.padrao}" em ${existingDir} — continuando nele.`);
+    } else {
+      const requiredBytes = totalSize(session.selectedFiles);
+      const baseDir = pickDirWithSpace(filmeDirs, requiredBytes, session.padrao);
+      session.finalDir = path.join(baseDir, session.padrao);
+    }
   } catch (err) {
     resetSession(ctx.chat.id);
     return ctx.reply(`❌ ${err.message}`);
   }
-  session.renamed = buildRenamedList(session.selectedFiles, session.padrao, false, null);
-  session.finalDir = path.join(baseDir, session.padrao);
   await triggerDownload(ctx, session);
 });
 
@@ -752,6 +950,11 @@ bot.catch((err, ctx) => {
 });
 
 bot.launch().then(() => console.log("Bot do Telegram rodando."));
+
+// Liga a renovação de cookie em background — assim que o bot sobe, já
+// garante (e depois vai mantendo sozinho) que o cookie está fresco, sem
+// depender de alguém disparar uma busca pra descobrir que expirou.
+startAutoRefresh();
 
 process.once("SIGINT", () => bot.stop("SIGINT"));
 process.once("SIGTERM", () => bot.stop("SIGTERM"));

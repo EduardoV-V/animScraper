@@ -2,7 +2,7 @@
 // Telegram (telegram-bot.js). Nada aqui depende de terminal/readline nem
 // de Telegram — só recebe dados e devolve dados.
 
-const { listFiles } = require("./api");
+const { search: apiSearch, listFiles } = require("./api");
 
 function humanSize(bytes) {
   if (bytes >= 1073741824) return (bytes / 1073741824).toFixed(2) + " GB";
@@ -86,70 +86,62 @@ function fuzzyMatch(query, name) {
 }
 
 /**
- * Monta (com cache curto) a lista completa de itens dentro de "Animes/",
- * varrendo todas as pastas de letra uma única vez. Isso é reaproveitado
- * entre buscas — inclusive entre as várias variações de título do
- * AniList — em vez de relistar tudo a cada chamada.
+ * A API oficial de busca (`/api/search`) devolve até 50 resultados, com os
+ * mais relevantes primeiro — mas quando não há 50 resultados realmente
+ * parecidos com a query, ela PREENCHE o resto com itens vizinhos
+ * alfabeticamente que não têm nada a ver (ex: buscar "one piece" também
+ * traz "Obey Me!", "Obsolete"...). Esse filtro usa o fuzzyMatch local (o
+ * mesmo usado antes pro índice inteiro) só pra descartar esse lixo de
+ * preenchimento — bem mais barato que rodá-lo contra o catálogo inteiro,
+ * já que agora só passa pelos ~50 itens que a API já filtrou.
+ *
+ * Se, por algum motivo, NENHUM resultado sobreviver ao filtro (ex: a API
+ * devolveu só itens de preenchimento, sem nenhum de fato relevante),
+ * devolve a lista de animes crua da API em vez de uma lista vazia — é
+ * melhor mostrar candidatos "meio certos" do que não mostrar nada.
  */
-const INDEX_TTL_MS = 5 * 60 * 1000;
-let indexCache = null;
-let indexCachedAt = 0;
-let indexBuildPromise = null;
-
-async function getAnimeIndex({ forceRefresh = false } = {}) {
-  const now = Date.now();
-  if (!forceRefresh && indexCache && now - indexCachedAt < INDEX_TTL_MS) {
-    return indexCache;
-  }
-  if (indexBuildPromise) return indexBuildPromise;
-
-  indexBuildPromise = (async () => {
-    try {
-      const animesRoot = await listFiles("Animes");
-      const letterFolders = (animesRoot.files || []).filter((f) => f.is_directory !== false);
-
-      const folderContents = await mapWithConcurrency(letterFolders, 5, async (folder) => {
-        const folderPath = `Animes/${folder.name}`;
-        try {
-          const data = await listFiles(folderPath);
-          return (data.files || [])
-            .filter((f) => f.is_directory !== false)
-            .map((item) => ({ name: item.name, path: `${folderPath}/${item.name}` }));
-        } catch {
-          return [];
-        }
-      });
-
-      indexCache = folderContents.flat();
-      indexCachedAt = Date.now();
-      return indexCache;
-    } finally {
-      indexBuildPromise = null;
-    }
-  })();
-
-  return indexBuildPromise;
+function filterRelevantAnimes(query, results) {
+  const animes = (results || []).filter((r) => r.kind === "anime");
+  const relevant = animes.filter((r) => fuzzyMatch(query, r.name));
+  return relevant.length > 0 ? relevant : animes;
 }
 
-/** Busca no índice (já cacheado) os itens cujo nome bate com a query. */
+/** Busca uma única query na API oficial do anitsu, já filtrada pra só
+ * animes relevantes. Nunca lança erro — uma falha numa variação de
+ * título (ex: timeout de rede) não deve derrubar a busca inteira quando
+ * outras variações podem funcionar. */
+async function searchAnimeOnce(query) {
+  try {
+    const data = await apiSearch(query);
+    return filterRelevantAnimes(query, data?.results);
+  } catch (err) {
+    console.error(`Busca por "${query}" falhou: ${err.message}`);
+    return [];
+  }
+}
+
+/** Busca uma query direto na API oficial. */
 async function findAnimeMatches(query) {
-  const index = await getAnimeIndex();
-  return index.filter((item) => fuzzyMatch(query, item.name));
+  const results = await searchAnimeOnce(query);
+  return results.map((r) => ({ name: r.name, path: r.path }));
 }
 
 /**
  * Roda a busca pra várias variações de título (ex: nome digitado em
- * português + nome romaji vindo do AniList) contra o MESMO índice
- * (montado uma única vez), e devolve a união sem duplicar pelo `path`.
+ * português + nome romaji/inglês/sinônimos vindos do AniList) — uma
+ * requisição por variação, em paralelo (a API não tem tradução embutida,
+ * então cada variação pode achar coisas diferentes) — e devolve a união
+ * sem duplicar pelo `path`.
  */
 async function findAnimeMatchesMulti(queries) {
-  const index = await getAnimeIndex();
+  const valid = (queries || []).filter(Boolean);
+  const perQuery = await mapWithConcurrency(valid, 5, searchAnimeOnce);
+
   const seen = new Map();
-  for (const q of queries) {
-    if (!q) continue;
-    for (const item of index) {
-      if (!seen.has(item.path) && fuzzyMatch(q, item.name)) {
-        seen.set(item.path, item);
+  for (const results of perQuery) {
+    for (const item of results) {
+      if (!seen.has(item.path)) {
+        seen.set(item.path, { name: item.name, path: item.path });
       }
     }
   }
@@ -178,11 +170,26 @@ async function getDirectoryView(remotePath) {
   };
 }
 
-function buildRenamedList(selected, padrao, isAnime, season) {
+/**
+ * Monta os nomes finais de arquivo pra cada item selecionado.
+ *
+ * `episodeNumbers` (opcional): número de episódio REAL de cada item de
+ * `selected`, na mesma ordem/posição. Sem isso, o episódio é inferido
+ * pela posição dentro de `selected` (i+1) — o que é ERRADO sempre que
+ * `selected` for um subconjunto filtrado da lista remota original (ex:
+ * o usuário pulou o episódio 3 porque já tinha baixado antes): nesse
+ * caso o episódio 4 viraria "E03" por engano, quebrando o nome que
+ * deveria bater com o download anterior. Sempre que houver a
+ * possibilidade de itens terem sido pulados no meio (como no fluxo do
+ * bot do Telegram, que pré-desmarca episódios já baixados), passe
+ * `episodeNumbers` com a posição real de cada um na listagem remota.
+ */
+function buildRenamedList(selected, padrao, isAnime, season, episodeNumbers) {
   if (isAnime) {
     return selected.map((f, i) => {
       const ext = f.name.split(".").pop();
-      const ep = String(i + 1).padStart(2, "0");
+      const epNumber = episodeNumbers ? episodeNumbers[i] : i + 1;
+      const ep = String(epNumber).padStart(2, "0");
       const s = String(season).padStart(2, "0");
       return `${padrao} - S${s}E${ep}.${ext}`;
     });
@@ -196,7 +203,6 @@ module.exports = {
   mapWithConcurrency,
   normalize,
   fuzzyMatch,
-  getAnimeIndex,
   findAnimeMatches,
   findAnimeMatchesMulti,
   VIDEO_EXTENSIONS,

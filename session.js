@@ -405,6 +405,85 @@ async function getFreshCookies() {
   return getValidCookies();
 }
 
+// ------------------------------------------------------------------
+// Renovação PROATIVA em background
+// ------------------------------------------------------------------
+//
+// Sem isso, o cookie só era checado/renovado na hora de uma busca de
+// verdade (dentro de api.js -> request()) — então se ele já tinha
+// expirado, a PRIMEIRA busca depois de um tempo parado pagava o custo
+// inteiro do handshake (healthcheck +, se preciso, abrir o Chromium
+// headless e refazer o OAuth do Discord — na prática isso já levou uns
+// 14s numa renovação real). Esse checkup roda sozinho, num intervalo,
+// independente de qualquer busca — se achar o cookie expirado, já
+// renova ali mesmo, então quando o usuário realmente buscar algo o
+// cookie já está fresco e a busca não espera por nada disso.
+//
+// O caminho reativo continua existindo como rede de segurança (ver
+// api.js: 401/403 no meio de uma requisição real -> getFreshCookies()).
+// As duas rotas passam pelo MESMO lock (renewalPromise) — então mesmo
+// que o checkup em background e uma busca do usuário decidam renovar ao
+// mesmo tempo, só um login de verdade acontece; o outro só espera o
+// mesmo resultado. Ou seja: nunca autentica duas vezes à toa.
+
+const AUTO_REFRESH_INTERVAL_MS =
+  Number(process.env.COOKIE_REFRESH_INTERVAL_MINUTES || 10) * 60 * 1000;
+
+let autoRefreshTimer = null;
+
+async function backgroundRefreshTick() {
+  try {
+    // Ignora de propósito o cache curto de 30s — aqui queremos saber o
+    // estado real do cookie salvo em disco, não o que uma busca recente
+    // já tinha cacheado.
+    const cookies = loadCookies();
+    const valid = await isSessionValid(cookies);
+
+    if (valid) {
+      // Já que confirmamos que está tudo certo, deixa isso cacheado
+      // também — evita mais um healthcheck redundante na próxima busca.
+      cachedCookies = cookies;
+      cachedAt = Date.now();
+      return;
+    }
+
+    console.log("[auto-refresh] Cookie expirado (checkup em background) — renovando...");
+    await getFreshCookies();
+    console.log("[auto-refresh] Cookie renovado com sucesso.");
+  } catch (err) {
+    // Não derruba o processo por causa disso — se a renovação em
+    // background falhar, a busca do usuário ainda tem o caminho reativo
+    // (401/403 -> getFreshCookies()) como último recurso.
+    console.error(`[auto-refresh] Falha ao renovar cookie em background: ${err.message}`);
+  }
+}
+
+/**
+ * Liga o checkup periódico em background. Chame uma vez, só em processos
+ * de longa duração (o bot do Telegram) — não faz sentido num script CLI
+ * que já termina sozinho logo depois de baixar.
+ */
+function startAutoRefresh() {
+  if (autoRefreshTimer) return; // já está rodando, não duplica
+  console.log(
+    `[auto-refresh] Ligado — checando a validade do cookie a cada ${AUTO_REFRESH_INTERVAL_MS / 60000} min.`
+  );
+  // Primeiro checkup logo na subida do processo, sem esperar o intervalo
+  // inteiro passar.
+  backgroundRefreshTick();
+  autoRefreshTimer = setInterval(backgroundRefreshTick, AUTO_REFRESH_INTERVAL_MS);
+  // Não segura o processo vivo só por causa desse timer (ex: durante um
+  // shutdown gracioso).
+  autoRefreshTimer.unref?.();
+}
+
+function stopAutoRefresh() {
+  if (autoRefreshTimer) {
+    clearInterval(autoRefreshTimer);
+    autoRefreshTimer = null;
+  }
+}
+
 module.exports = {
   ANITSU_BASE,
   getValidCookies,
@@ -414,4 +493,6 @@ module.exports = {
   cookieHeader,
   loadCookies,
   saveCookies,
+  startAutoRefresh,
+  stopAutoRefresh,
 };
